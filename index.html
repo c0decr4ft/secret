@@ -91,6 +91,9 @@
       align-items: center;
       justify-content: center;
       cursor: pointer;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
     }
     .card:hover { background: #eee; }
     .card-avatar {
@@ -483,7 +486,16 @@
       accounts.forEach((a, i) => {
         const card = document.createElement('div');
         card.className = 'card';
-        card.onclick = () => tryLogin(a.id);
+        card.setAttribute('role', 'button');
+        const doSelect = () => tryLogin(a.id);
+        card.addEventListener('click', doSelect);
+        card.addEventListener('touchend', function(e) {
+          e.preventDefault();
+          doSelect();
+        }, { passive: false });
+        card.addEventListener('keydown', function(e) {
+          if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); doSelect(); }
+        });
         card.innerHTML = '<div class="card-avatar" style="background:' + colors[i % 3] + '">' + esc(a.displayName[0]) + '</div><div class="card-name">' + esc(a.displayName) + '</div>' + (a.hasPassword ? '<div style="font-size:0.7rem;color:#bbb;margin-top:0.5rem">&#128274; password</div>' : '');
         el.appendChild(card);
       });
