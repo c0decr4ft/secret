@@ -222,6 +222,89 @@
       flex-shrink: 0;
     }
     .send-btn:hover { background: #333; }
+
+    /* Password overlay */
+    #password-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(255,255,255,0.95);
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 1rem;
+      z-index: 100;
+    }
+    #password-overlay.active { display: flex; }
+    #password-overlay h3 { font-size: 1.1rem; font-weight: 600; }
+    #password-overlay input {
+      padding: 0.7rem 1.2rem;
+      border: 1px solid #e0e0e0;
+      border-radius: 12px;
+      font-size: 0.95rem;
+      width: 240px;
+      text-align: center;
+    }
+    .pw-error { color: #e74c3c; font-size: 0.8rem; min-height: 1.2em; }
+    .pw-buttons { display: flex; gap: 0.75rem; }
+    .btn {
+      padding: 0.6rem 1.5rem;
+      border: 1px solid #e0e0e0;
+      border-radius: 10px;
+      background: #fff;
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+    }
+    .btn:hover { background: #f5f5f5; }
+    .btn-primary { background: #1a1a1a; color: #fff; border-color: #1a1a1a; }
+    .btn-primary:hover { background: #333; }
+
+    /* Settings screen */
+    #screen-settings { flex-direction: column; background: #fff; }
+    .settings-header {
+      display: flex;
+      align-items: center;
+      padding: 1rem 1.2rem;
+      border-bottom: 1px solid #f0f0f0;
+      gap: 0.75rem;
+    }
+    .settings-header h2 { font-size: 1.1rem; font-weight: 600; }
+    .settings-body {
+      flex: 1;
+      padding: 2rem 1.5rem;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+    }
+    .setting-group h3 {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #999;
+      margin-bottom: 0.75rem;
+      font-weight: 600;
+    }
+    .setting-row {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .setting-row label { font-size: 0.85rem; font-weight: 500; }
+    .setting-row input {
+      padding: 0.65rem 1rem;
+      border: 1px solid #e8e8e8;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      outline: none;
+    }
+    .setting-row input:focus { border-color: #bbb; }
+    .settings-actions { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+    .status-msg { font-size: 0.8rem; color: #27ae60; min-height: 1.2em; }
+    .btn-danger { color: #e74c3c; border-color: #f5c6cb; }
+    .btn-danger:hover { background: #fef0f0; }
+    .logout-section { margin-top: auto; padding-top: 2rem; border-top: 1px solid #f0f0f0; }
   </style>
 </head>
 <body>
@@ -243,17 +326,59 @@
 
   <div id="screen-cards" class="screen"></div>
 
+  <div id="password-overlay">
+    <h3 id="pw-title">Enter password</h3>
+    <input type="password" id="pw-input" placeholder="Password" autocomplete="off">
+    <div class="pw-error" id="pw-error"></div>
+    <div class="pw-buttons">
+      <button class="btn" onclick="cancelPassword()">Cancel</button>
+      <button class="btn btn-primary" onclick="submitPassword()">Enter</button>
+    </div>
+  </div>
+
   <div id="screen-chat" class="screen">
     <div class="chat-header">
       <button class="header-btn" onclick="goBack()">&#8592;</button>
       <span class="chat-with-name" id="chat-partner-name"></span>
       <span class="logged-as" id="logged-as"></span>
+      <button class="header-btn" onclick="openSettings()" title="Settings">&#9881;</button>
     </div>
     <div class="chat-tabs" id="chat-tabs"></div>
     <div class="chat-messages" id="chat-messages"></div>
     <div class="chat-input-bar">
       <input type="text" id="chat-input" placeholder="Type a message..." autocomplete="off">
       <button class="send-btn" onclick="sendMessage()">&#8593;</button>
+    </div>
+  </div>
+
+  <div id="screen-settings" class="screen">
+    <div class="settings-header">
+      <button class="header-btn" onclick="closeSettings()">&#8592;</button>
+      <h2>Settings</h2>
+    </div>
+    <div class="settings-body">
+      <div class="setting-group">
+        <h3>Profile</h3>
+        <div class="setting-row">
+          <label>Display Name</label>
+          <input type="text" id="set-name" maxlength="20" placeholder="Your name">
+        </div>
+      </div>
+      <div class="setting-group">
+        <h3>Security</h3>
+        <div class="setting-row">
+          <label id="pw-label">Set a Password</label>
+          <input type="password" id="set-password" placeholder="New password" autocomplete="new-password">
+        </div>
+      </div>
+      <div class="settings-actions">
+        <button class="btn btn-primary" onclick="saveSettings()">Save Changes</button>
+        <button class="btn btn-danger" id="btn-remove-pw" onclick="removePassword()">Remove Password</button>
+      </div>
+      <div class="status-msg" id="settings-status"></div>
+      <div class="logout-section">
+        <button class="btn" onclick="logout()" style="width:100%">Sign out</button>
+      </div>
     </div>
   </div>
 
@@ -274,13 +399,14 @@
 
     const PASSPHRASE = 'liath';
     const DEFAULT_ACCOUNTS = {
-      luca: { id: 'luca', displayName: 'Luca' },
-      matteo: { id: 'matteo', displayName: 'Matteo' },
-      nora: { id: 'nora', displayName: 'Nora' }
+      luca: { id: 'luca', displayName: 'Luca', password: '' },
+      matteo: { id: 'matteo', displayName: 'Matteo', password: '' },
+      nora: { id: 'nora', displayName: 'Nora', password: '' }
     };
 
     let accounts = [];
     let me = null;
+    let pendingLoginId = null;
     let currentPartner = null;
     let chatListenerRef = null;
 
@@ -314,16 +440,27 @@
         inp.blur();
         accounts = Object.keys(DEFAULT_ACCOUNTS).map(k => ({
           id: k,
-          displayName: DEFAULT_ACCOUNTS[k].displayName
+          displayName: DEFAULT_ACCOUNTS[k].displayName,
+          hasPassword: !!(DEFAULT_ACCOUNTS[k].password)
         }));
         buildCards();
         show('screen-cards');
         db.ref('accounts').once('value', snap => {
-          if (snap.exists()) {
+          if (!snap.exists()) {
+            db.ref('accounts').set(DEFAULT_ACCOUNTS).then(() => {
+              accounts = Object.keys(DEFAULT_ACCOUNTS).map(k => ({
+                id: k,
+                displayName: DEFAULT_ACCOUNTS[k].displayName,
+                hasPassword: !!(DEFAULT_ACCOUNTS[k].password)
+              }));
+              buildCards();
+            });
+          } else {
             const data = snap.val();
             accounts = Object.keys(data).map(k => ({
               id: k,
-              displayName: (data[k] && data[k].displayName) || k
+              displayName: (data[k] && data[k].displayName) || k,
+              hasPassword: !!(data[k] && data[k].password)
             }));
             buildCards();
           }
@@ -346,22 +483,63 @@
       accounts.forEach((a, i) => {
         const card = document.createElement('div');
         card.className = 'card';
-        card.onclick = () => login(a.id);
-        card.innerHTML = '<div class="card-avatar" style="background:' + colors[i % 3] + '">' + esc(a.displayName[0]) + '</div><div class="card-name">' + esc(a.displayName) + '</div>';
+        card.onclick = () => tryLogin(a.id);
+        card.innerHTML = '<div class="card-avatar" style="background:' + colors[i % 3] + '">' + esc(a.displayName[0]) + '</div><div class="card-name">' + esc(a.displayName) + '</div>' + (a.hasPassword ? '<div style="font-size:0.7rem;color:#bbb;margin-top:0.5rem">&#128274; password</div>' : '');
         el.appendChild(card);
       });
     }
 
-    function login(id) {
+    function tryLogin(id) {
       const acct = accounts.find(a => a.id === id);
       if (!acct) return;
-      me = acct;
-      const others = accounts.filter(a => a.id !== id);
-      currentPartner = others[0]?.id;
-      if (!currentPartner) return;
-      document.getElementById('logged-as').textContent = me.displayName;
-      show('screen-chat');
-      switchChat(currentPartner);
+      if (acct.hasPassword) {
+        pendingLoginId = id;
+        document.getElementById('pw-title').textContent = 'Enter password for ' + acct.displayName;
+        document.getElementById('pw-input').value = '';
+        document.getElementById('pw-error').textContent = '';
+        document.getElementById('password-overlay').classList.add('active');
+        setTimeout(() => document.getElementById('pw-input').focus(), 100);
+      } else {
+        doLogin(id, null);
+      }
+    }
+
+    function submitPassword() {
+      const pw = document.getElementById('pw-input').value;
+      doLogin(pendingLoginId, pw);
+    }
+
+    function cancelPassword() {
+      pendingLoginId = null;
+      document.getElementById('password-overlay').classList.remove('active');
+    }
+
+    document.getElementById('pw-input').addEventListener('keydown', e => {
+      if (e.key === 'Enter') submitPassword();
+    });
+
+    function doLogin(id, password) {
+      db.ref('accounts/' + id).once('value', snap => {
+        const acct = snap.val();
+        if (!acct) return;
+        if (acct.password && acct.password !== password) {
+          document.getElementById('pw-error').textContent = 'Wrong password';
+          return;
+        }
+        me = {
+          id: acct.id,
+          displayName: acct.displayName,
+          hasPassword: !!(acct.password)
+        };
+        pendingLoginId = null;
+        document.getElementById('password-overlay').classList.remove('active');
+        document.getElementById('logged-as').textContent = me.displayName;
+        const others = accounts.filter(a => a.id !== id);
+        currentPartner = others[0]?.id;
+        if (!currentPartner) return;
+        show('screen-chat');
+        switchChat(currentPartner);
+      });
     }
 
     function nameOf(id) {
@@ -432,13 +610,35 @@
       inp.value = '';
       inp.focus();
 
-      db.ref('chats/' + key).push(msg);
+      db.ref('chats/' + key).push(msg).catch(err => {
+        console.error('Send failed:', err);
+        alert('Could not send. Check Firebase rules allow read/write.');
+      });
     }
 
     document.getElementById('chat-input').addEventListener('keydown', e => {
       if (e.key === 'Enter') {
         e.preventDefault();
         sendMessage();
+      }
+    });
+
+    // Refresh chat when user returns to tab (helps with real-time on mobile)
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible' && me && currentPartner) {
+        const key = [me.id, currentPartner].sort().join('_');
+        db.ref('chats/' + key).orderByChild('time').once('value', snap => {
+          const c = document.getElementById('chat-messages');
+          if (!c || !document.getElementById('screen-chat').classList.contains('active')) return;
+          const data = snap.val();
+          c.innerHTML = '';
+          if (!data) {
+            c.innerHTML = '<div class="empty-chat">No messages yet — say hi!</div>';
+          } else {
+            Object.values(data).sort((a, b) => a.time - b.time).forEach(m => appendMsg(m));
+          }
+          c.scrollTop = c.scrollHeight;
+        });
       }
     });
 
@@ -457,7 +657,84 @@
           const data = snap.val();
           accounts = Object.keys(data).map(k => ({
             id: k,
-            displayName: (data[k] && data[k].displayName) || k
+            displayName: (data[k] && data[k].displayName) || k,
+            hasPassword: !!(data[k] && data[k].password)
+          }));
+          buildCards();
+        }
+      });
+    }
+
+    function openSettings() {
+      document.getElementById('set-name').value = me.displayName;
+      document.getElementById('set-password').value = '';
+      document.getElementById('btn-remove-pw').style.display = me.hasPassword ? '' : 'none';
+      document.getElementById('pw-label').textContent = me.hasPassword ? 'Change Password' : 'Set a Password';
+      document.getElementById('settings-status').textContent = '';
+      show('screen-settings');
+    }
+
+    function closeSettings() {
+      show('screen-chat');
+      renderTabs();
+    }
+
+    function saveSettings() {
+      const name = document.getElementById('set-name').value.trim();
+      const pw = document.getElementById('set-password').value;
+
+      const updates = {};
+      if (name) updates.displayName = name.substring(0, 20);
+      if (pw) updates.password = pw;
+
+      if (Object.keys(updates).length === 0) return;
+
+      db.ref('accounts/' + me.id).update(updates).then(() => {
+        if (name) me.displayName = name.substring(0, 20);
+        if (pw) me.hasPassword = true;
+        const a = accounts.find(x => x.id === me.id);
+        if (a) a.displayName = me.displayName;
+        if (a) a.hasPassword = !!pw;
+        document.getElementById('logged-as').textContent = me.displayName;
+        document.getElementById('btn-remove-pw').style.display = me.hasPassword ? '' : 'none';
+        document.getElementById('pw-label').textContent = me.hasPassword ? 'Change Password' : 'Set a Password';
+        document.getElementById('settings-status').textContent = 'Saved!';
+        setTimeout(() => { document.getElementById('settings-status').textContent = ''; }, 2000);
+      });
+    }
+
+    function removePassword() {
+      db.ref('accounts/' + me.id).update({ password: '' }).then(() => {
+        me.hasPassword = false;
+        const a = accounts.find(x => x.id === me.id);
+        if (a) a.hasPassword = false;
+        document.getElementById('btn-remove-pw').style.display = 'none';
+        document.getElementById('pw-label').textContent = 'Set a Password';
+        document.getElementById('settings-status').textContent = 'Password removed!';
+        setTimeout(() => { document.getElementById('settings-status').textContent = ''; }, 2000);
+      });
+    }
+
+    function logout() {
+      if (chatListenerRef) chatListenerRef.off();
+      me = null;
+      currentPartner = null;
+      pendingLoginId = null;
+      document.getElementById('password-overlay').classList.remove('active');
+      accounts = Object.keys(DEFAULT_ACCOUNTS).map(k => ({
+        id: k,
+        displayName: DEFAULT_ACCOUNTS[k].displayName,
+        hasPassword: !!(DEFAULT_ACCOUNTS[k].password)
+      }));
+      buildCards();
+      show('screen-cards');
+      db.ref('accounts').once('value', snap => {
+        if (snap.exists()) {
+          const data = snap.val();
+          accounts = Object.keys(data).map(k => ({
+            id: k,
+            displayName: (data[k] && data[k].displayName) || k,
+            hasPassword: !!(data[k] && data[k].password)
           }));
           buildCards();
         }

@@ -1,0 +1,12 @@
+{
+  "rules": {
+    "accounts": {
+      ".read": true,
+      ".write": true
+    },
+    "chats": {
+      ".read": true,
+      ".write": true
+    }
+  }
+}
