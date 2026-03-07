@@ -210,36 +210,31 @@
       return d.innerHTML;
     }
 
-    // Type "liath" to unlock → show the three cards
+    // Type "liath" to unlock → immediately show the three cards
     document.getElementById('code-input').addEventListener('input', function() {
       if (this.value.toLowerCase().trim() === PASSPHRASE) {
-        loadAccounts();
-      }
-    });
-
-    function loadAccounts() {
-      db.ref('accounts').once('value', snap => {
-        if (!snap.exists()) {
-          db.ref('accounts').set(DEFAULT_ACCOUNTS).then(loadAccounts);
-          return;
-        }
-        const data = snap.val();
-        accounts = Object.keys(data).map(k => ({
+        this.value = '';
+        this.blur();
+        // Show cards immediately with defaults, then fetch from Firebase
+        accounts = Object.keys(DEFAULT_ACCOUNTS).map(k => ({
           id: k,
-          displayName: (data[k] && data[k].displayName) || k
+          displayName: DEFAULT_ACCOUNTS[k].displayName
         }));
-        if (accounts.length === 0) {
-          accounts = Object.keys(DEFAULT_ACCOUNTS).map(k => ({
-            id: k,
-            displayName: DEFAULT_ACCOUNTS[k].displayName
-          }));
-        }
-        document.getElementById('code-input').value = '';
-        document.getElementById('code-input').blur();
         buildCards();
         show('screen-cards');
-      });
-    }
+        // Fetch from Firebase to get any saved data (updates in background)
+        db.ref('accounts').once('value', snap => {
+          if (snap.exists()) {
+            const data = snap.val();
+            accounts = Object.keys(data).map(k => ({
+              id: k,
+              displayName: (data[k] && data[k].displayName) || k
+            }));
+            buildCards();
+          }
+        });
+      }
+    });
 
     function buildCards() {
       const el = document.getElementById('screen-cards');
