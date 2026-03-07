@@ -66,8 +66,9 @@
     }
     .header-btn:hover { background: #f5f5f5; }
     .chat-with-name { font-weight: 600; font-size: 1.05rem; flex: 1; }
+    .chat-tabs-label { font-size: 0.7rem; color: #999; padding: 0.4rem 1.2rem 0; }
     .logged-as { font-size: 0.7rem; color: #bbb; }
-    .chat-tabs { display: flex; border-bottom: 1px solid #f0f0f0; flex-shrink: 0; }
+    .chat-tabs { display: flex; border-bottom: 1px solid #f0f0f0; flex-shrink: 0; background: #fafafa; }
     .chat-tab {
       flex: 1; padding: 0.75rem; text-align: center; font-size: 0.85rem; font-weight: 500; cursor: pointer;
       color: #999; border-bottom: 2px solid transparent;
@@ -161,6 +162,7 @@
       <span class="logged-as" id="logged-as"></span>
       <button class="header-btn" onclick="openSettings()" title="Settings">&#9881;</button>
     </div>
+    <div class="chat-tabs-label">Chat with:</div>
     <div class="chat-tabs" id="chat-tabs"></div>
     <div class="chat-messages" id="chat-messages"></div>
     <div class="chat-input-bar">
@@ -207,10 +209,11 @@
       nora: { id: 'nora', displayName: 'Nora', password: '' }
     };
 
+    // If connection fails, get your database URL from Firebase Console > Realtime Database and paste it here:
     const firebaseConfig = {
       apiKey: "AIzaSyBky-dq76Uic181p8BUwAN-rVyJ9Brte4w",
       authDomain: "secret-chat-app-9f5db.firebaseapp.com",
-      databaseURL: "https://secret-chat-app-9f5db-default-rtdb.firebaseio.com",
+      databaseURL: "https://secret-chat-app-9f5db-default-rtdb.firebaseio.com",  // or .us-central1.firebasedatabase.app
       projectId: "secret-chat-app-9f5db",
       storageBucket: "secret-chat-app-9f5db.firebasestorage.app",
       messagingSenderId: "723249335922",
@@ -218,6 +221,7 @@
     };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
+    const DB_URL = firebaseConfig.databaseURL.replace(/\/$/, '');
 
     let accounts = [];
     let me = null;
@@ -367,9 +371,10 @@
     function renderTabs() {
       const tabs = document.getElementById('chat-tabs');
       tabs.innerHTML = '';
-      accounts.filter(a => a.id !== me.id).forEach(a => {
+      const others = accounts.length ? accounts : Object.keys(DEFAULT_ACCOUNTS).map(k => ({ id: k, displayName: DEFAULT_ACCOUNTS[k].displayName }));
+      others.filter(a => a.id !== me.id).forEach(a => {
         const tab = document.createElement('div');
-        tab.className = 'chat-tab' + (p.id === currentPartner ? ' active' : '');
+        tab.className = 'chat-tab' + (a.id === currentPartner ? ' active' : '');
         tab.textContent = a.displayName;
         tab.onclick = () => switchChat(a.id);
         tabs.appendChild(tab);
@@ -417,6 +422,15 @@
       return div;
     }
 
+    function sendViaRest(key, msg, url) {
+      const base = url || DB_URL;
+      return fetch(base + '/chats/' + key + '.json', {
+        method: 'POST',
+        body: JSON.stringify(msg),
+        headers: { 'Content-Type': 'application/json' }
+      }).then(r => { if (!r.ok) throw new Error('REST failed'); });
+    }
+
     function sendMessage() {
       const inp = document.getElementById('chat-input');
       const text = inp.value.trim();
@@ -432,18 +446,22 @@
       inp.focus();
 
       function trySend(attempt) {
-        const ref = db.ref('chats/' + key);
-        ref.push(msg)
+        const urls = [DB_URL, 'https://secret-chat-app-9f5db-default-rtdb.us-central1.firebasedatabase.app'];
+        const tryRest = (i) => {
+          if (i >= urls.length) {
+            msgEl.remove();
+            inp.value = text;
+            inp.focus();
+            alert('Connection failed. In Firebase Console: 1) Create Realtime Database (Build > Realtime Database). 2) Copy your database URL from the console. 3) In index.html, update databaseURL in firebaseConfig.');
+            return;
+          }
+          sendViaRest(key, msg, urls[i]).then(() => {}).catch(() => tryRest(i + 1));
+        };
+        db.ref('chats/' + key).push(msg)
           .then(() => {})
-          .catch(err => {
-            if (attempt < 2) {
-              setTimeout(() => trySend(attempt + 1), 1000);
-            } else {
-              msgEl.remove();
-              inp.value = text;
-              inp.focus();
-              alert('Connection failed. Make sure Realtime Database is enabled in Firebase Console and rules are deployed. Your message was not sent.');
-            }
+          .catch(() => {
+            if (attempt < 1) setTimeout(() => trySend(1), 500);
+            else tryRest(0);
           });
       }
       trySend(0);
@@ -451,6 +469,25 @@
 
     document.getElementById('chat-input').addEventListener('keydown', e => {
       if (e.key === 'Enter') { e.preventDefault(); sendMessage(); }
+    });
+
+    // Refresh chat when returning to tab (messages are stored in Firebase and persist across reloads/devices)
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible' && me && currentPartner) {
+        const key = [me.id, currentPartner].sort().join('_');
+        db.ref('chats/' + key).once('value', snap => {
+          const c = document.getElementById('chat-messages');
+          if (!c || !document.getElementById('screen-chat').classList.contains('active')) return;
+          const data = snap.val();
+          c.innerHTML = '';
+          if (!data) {
+            c.innerHTML = '<div class="empty-chat">No messages yet — say hi!</div>';
+          } else {
+            Object.values(data).sort((a, b) => (a.time || 0) - (b.time || 0)).forEach(m => appendMsg(m));
+          }
+          c.scrollTop = c.scrollHeight;
+        });
+      }
     });
 
     function goBack() {
