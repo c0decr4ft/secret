@@ -87,27 +87,6 @@
       opacity: 0.15;
     }
 
-    /* ── Panic / lock button ── */
-    .panic-btn {
-      position: fixed;
-      top: 1rem;
-      left: 1rem;
-      width: 38px;
-      height: 38px;
-      border-radius: 50%;
-      border: 1px solid #e0e0e0;
-      background: #fff;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.1rem;
-      color: #999;
-      z-index: 200;
-      transition: all 0.2s;
-    }
-    .panic-btn:hover { background: #f5f5f5; color: #666; }
-
     /* ── Cards screen ── */
     #screen-cards {
       align-items: center;
@@ -338,9 +317,7 @@
   </div>
 
   <!-- Screen: Pick account -->
-  <div id="screen-cards" class="screen">
-    <button class="panic-btn" onclick="panicLock()" title="Lock">&#8592;</button>
-  </div>
+  <div id="screen-cards" class="screen"></div>
 
   <!-- Password overlay -->
   <div id="password-overlay">
@@ -360,7 +337,6 @@
       <span class="chat-with-name" id="chat-partner-name"></span>
       <span class="logged-as" id="logged-as"></span>
       <button class="header-btn" onclick="openSettings()" title="Settings">&#9881;</button>
-      <button class="header-btn" onclick="panicLock()" title="Lock" style="color:#e74c3c;border-color:#f5c6cb;">&#128274;</button>
     </div>
     <div class="chat-tabs" id="chat-tabs"></div>
     <div class="chat-messages" id="chat-messages"></div>
@@ -465,7 +441,7 @@
       e.preventDefault();
 
       clearTimeout(secretTimer);
-      secretTimer = setTimeout(() => { secretBuffer = ''; }, 4000);
+      secretTimer = setTimeout(() => { secretBuffer = ''; }, 30000);
 
       secretBuffer += e.key.toLowerCase();
 
