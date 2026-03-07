@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Secret Chat</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Site not found &middot; GitHub Pages</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
@@ -12,437 +12,630 @@
     body {
       font-family: 'Inter', sans-serif;
       background: #fff;
-      height: 100vh;
+      height: 100dvh;
       overflow: hidden;
       color: #1a1a1a;
+      -webkit-tap-highlight-color: transparent;
     }
 
-    /* ── Secret input screen ── */
+    .screen { display: none; height: 100dvh; width: 100vw; position: absolute; top: 0; left: 0; }
+    .screen.active { display: flex; }
+
+    /* ── Passphrase screen (fake 404) ── */
     #screen-secret {
-      display: flex;
       align-items: center;
       justify-content: center;
-      height: 100vh;
-      width: 100vw;
-      background: #fff;
-    }
-
-    #secret-input {
-      position: absolute;
-      opacity: 0;
-      pointer-events: all;
-      width: 100%;
-      height: 100%;
+      background: #fafafa;
+      flex-direction: column;
       cursor: default;
     }
-
-    #typed-display {
-      font-size: 1.1rem;
-      letter-spacing: 0.3em;
-      color: #ccc;
-      font-weight: 300;
-      transition: opacity 0.3s;
+    .fake-404 {
+      text-align: center;
+      max-width: 560px;
+      padding: 2rem;
+    }
+    .fake-404-title {
+      font-size: 120px;
+      font-weight: 200;
+      color: #bbb;
+      letter-spacing: -5px;
+      line-height: 1;
+      margin-bottom: 20px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    }
+    .fake-404 h2 {
+      font-size: 20px;
+      font-weight: 600;
+      color: #666;
+      margin-bottom: 14px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    }
+    .fake-404 p {
+      font-size: 15px;
+      color: #999;
+      line-height: 1.6;
+      margin-bottom: 8px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    }
+    .fake-404 p code {
+      background: #eee;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-size: 14px;
+    }
+    .fake-404 a {
+      color: #4078c0;
+      text-decoration: none;
+    }
+    .fake-404-divider {
+      width: 60px;
+      height: 1px;
+      background: #ddd;
+      margin: 30px auto;
+    }
+    .fake-404-footer {
+      font-size: 13px;
+      color: #bbb;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    }
+    .fake-404-footer span { margin: 0 10px; }
+    .fake-404-gh {
+      display: block;
+      margin: 16px auto 0;
+      width: 36px;
+      height: 36px;
+      opacity: 0.15;
     }
 
-    /* ── Card selection screen ── */
+    /* ── Cards screen ── */
     #screen-cards {
-      display: none;
       align-items: center;
       justify-content: center;
-      height: 100vh;
-      width: 100vw;
       background: #fff;
       gap: 2rem;
       flex-wrap: wrap;
+      padding: 2rem;
     }
-
     .card {
-      width: 200px;
-      height: 280px;
+      width: 200px; height: 280px;
       background: #fafafa;
       border: 1px solid #e8e8e8;
       border-radius: 20px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
       cursor: pointer;
-      transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-      position: relative;
-      overflow: hidden;
+      transition: all 0.3s cubic-bezier(0.25,0.46,0.45,0.94);
+      animation: fadeUp 0.5s ease forwards;
+      opacity: 0;
     }
-
-    .card:hover {
-      transform: translateY(-8px);
-      box-shadow: 0 20px 60px rgba(0,0,0,0.08);
-      border-color: #d0d0d0;
-    }
-
-    .card:active {
-      transform: translateY(-2px) scale(0.98);
-    }
-
+    .card:nth-child(1) { animation-delay: 0.1s; }
+    .card:nth-child(2) { animation-delay: 0.25s; }
+    .card:nth-child(3) { animation-delay: 0.4s; }
+    .card:hover { transform: translateY(-8px); box-shadow: 0 20px 60px rgba(0,0,0,0.08); border-color: #d0d0d0; }
+    .card:active { transform: translateY(-2px) scale(0.98); }
     .card-avatar {
-      width: 80px;
-      height: 80px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 2rem;
-      font-weight: 700;
-      color: #fff;
+      width: 80px; height: 80px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2rem; font-weight: 700; color: #fff;
       margin-bottom: 1.2rem;
     }
-
     .card:nth-child(1) .card-avatar { background: linear-gradient(135deg, #667eea, #764ba2); }
     .card:nth-child(2) .card-avatar { background: linear-gradient(135deg, #f093fb, #f5576c); }
     .card:nth-child(3) .card-avatar { background: linear-gradient(135deg, #4facfe, #00f2fe); }
+    .card-name { font-size: 1.2rem; font-weight: 600; }
+    .card-lock { font-size: 0.7rem; color: #bbb; margin-top: 0.5rem; }
 
-    .card-name {
-      font-size: 1.2rem;
-      font-weight: 600;
-      letter-spacing: 0.02em;
-    }
-
-    /* ── Chat screen ── */
-    #screen-chat {
+    /* ── Password prompt (overlay) ── */
+    #password-overlay {
       display: none;
-      flex-direction: column;
-      height: 100vh;
-      width: 100vw;
-      background: #fff;
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(255,255,255,0.95);
+      align-items: center; justify-content: center;
+      flex-direction: column; gap: 1rem;
+      z-index: 100;
     }
-
-    .chat-header {
-      display: flex;
-      align-items: center;
-      padding: 1rem 1.5rem;
-      border-bottom: 1px solid #f0f0f0;
-      gap: 1rem;
-    }
-
-    .back-btn {
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      border: 1px solid #e8e8e8;
-      background: #fff;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.2s;
-      font-size: 1rem;
-      color: #666;
-    }
-
-    .back-btn:hover { background: #f5f5f5; }
-
-    .chat-with-name {
-      font-weight: 600;
-      font-size: 1.05rem;
-    }
-
-    .chat-tabs {
-      display: flex;
-      border-bottom: 1px solid #f0f0f0;
-    }
-
-    .chat-tab {
-      flex: 1;
-      padding: 0.75rem;
+    #password-overlay.active { display: flex; }
+    #password-overlay h3 { font-size: 1.1rem; font-weight: 600; }
+    #password-overlay input {
+      padding: 0.7rem 1.2rem;
+      border: 1px solid #e0e0e0;
+      border-radius: 12px;
+      font-size: 0.95rem;
+      font-family: 'Inter', sans-serif;
+      outline: none;
+      width: 240px;
       text-align: center;
+    }
+    #password-overlay input:focus { border-color: #bbb; }
+    .pw-error { color: #e74c3c; font-size: 0.8rem; min-height: 1.2em; }
+    .pw-buttons { display: flex; gap: 0.75rem; }
+    .btn {
+      padding: 0.6rem 1.5rem;
+      border: 1px solid #e0e0e0;
+      border-radius: 10px;
+      background: #fff;
+      font-family: 'Inter', sans-serif;
       font-size: 0.85rem;
       font-weight: 500;
       cursor: pointer;
-      color: #999;
+      transition: all 0.2s;
+    }
+    .btn:hover { background: #f5f5f5; }
+    .btn-primary { background: #1a1a1a; color: #fff; border-color: #1a1a1a; }
+    .btn-primary:hover { background: #333; }
+
+    /* ── Chat screen ── */
+    #screen-chat { flex-direction: column; background: #fff; }
+    .chat-header {
+      display: flex; align-items: center;
+      padding: 1rem 1.2rem;
+      border-bottom: 1px solid #f0f0f0;
+      gap: 0.75rem; flex-shrink: 0;
+    }
+    .header-btn {
+      width: 36px; height: 36px; border-radius: 50%;
+      border: 1px solid #e8e8e8; background: #fff;
+      cursor: pointer; display: flex;
+      align-items: center; justify-content: center;
+      transition: all 0.2s; font-size: 1rem; color: #666;
+    }
+    .header-btn:hover { background: #f5f5f5; }
+    .chat-with-name { font-weight: 600; font-size: 1.05rem; flex: 1; }
+    .logged-as { font-size: 0.7rem; color: #bbb; }
+
+    .chat-tabs { display: flex; border-bottom: 1px solid #f0f0f0; flex-shrink: 0; }
+    .chat-tab {
+      flex: 1; padding: 0.75rem; text-align: center;
+      font-size: 0.85rem; font-weight: 500;
+      cursor: pointer; color: #999;
       border-bottom: 2px solid transparent;
       transition: all 0.2s;
     }
-
     .chat-tab:hover { color: #666; }
     .chat-tab.active { color: #1a1a1a; border-bottom-color: #1a1a1a; }
 
     .chat-messages {
-      flex: 1;
-      overflow-y: auto;
-      padding: 1.5rem;
-      display: flex;
-      flex-direction: column;
-      gap: 0.6rem;
+      flex: 1; overflow-y: auto; padding: 1.5rem;
+      display: flex; flex-direction: column; gap: 0.5rem;
+      -webkit-overflow-scrolling: touch;
     }
-
     .msg {
-      max-width: 75%;
-      padding: 0.7rem 1rem;
-      border-radius: 18px;
-      font-size: 0.9rem;
-      line-height: 1.4;
-      word-wrap: break-word;
+      max-width: 75%; padding: 0.65rem 1rem;
+      border-radius: 18px; font-size: 0.9rem;
+      line-height: 1.4; word-wrap: break-word;
+      animation: msgPop 0.15s ease;
     }
-
     .msg.sent {
-      align-self: flex-end;
-      background: #1a1a1a;
-      color: #fff;
+      align-self: flex-end; background: #1a1a1a; color: #fff;
       border-bottom-right-radius: 4px;
     }
-
     .msg.received {
-      align-self: flex-start;
-      background: #f2f2f2;
-      color: #1a1a1a;
+      align-self: flex-start; background: #f2f2f2; color: #1a1a1a;
       border-bottom-left-radius: 4px;
     }
-
-    .msg-time {
-      font-size: 0.65rem;
-      opacity: 0.5;
-      margin-top: 0.2rem;
-    }
-
+    .msg-time { font-size: 0.6rem; opacity: 0.45; margin-top: 0.15rem; }
     .msg.sent .msg-time { text-align: right; }
+    .empty-chat {
+      flex: 1; display: flex; align-items: center; justify-content: center;
+      color: #d0d0d0; font-size: 0.85rem; font-weight: 300;
+    }
 
     .chat-input-bar {
-      display: flex;
-      padding: 1rem 1.5rem;
-      gap: 0.75rem;
-      border-top: 1px solid #f0f0f0;
-      align-items: center;
+      display: flex; padding: 1rem 1.2rem; gap: 0.6rem;
+      border-top: 1px solid #f0f0f0; align-items: center; flex-shrink: 0;
     }
-
     #chat-input {
-      flex: 1;
-      padding: 0.7rem 1rem;
-      border: 1px solid #e8e8e8;
-      border-radius: 24px;
-      font-size: 0.9rem;
-      font-family: 'Inter', sans-serif;
-      outline: none;
-      transition: border-color 0.2s;
+      flex: 1; padding: 0.65rem 1rem;
+      border: 1px solid #e8e8e8; border-radius: 24px;
+      font-size: 0.9rem; font-family: 'Inter', sans-serif;
+      outline: none; transition: border-color 0.2s;
     }
-
     #chat-input:focus { border-color: #bbb; }
-
-    #send-btn {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      border: none;
-      background: #1a1a1a;
-      color: #fff;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.2s;
-      font-size: 1.1rem;
+    .send-btn {
+      width: 38px; height: 38px; border-radius: 50%;
+      border: none; background: #1a1a1a; color: #fff;
+      cursor: pointer; display: flex;
+      align-items: center; justify-content: center;
+      font-size: 1.1rem; flex-shrink: 0;
+      transition: background 0.2s;
     }
+    .send-btn:hover { background: #333; }
 
-    #send-btn:hover { background: #333; }
-
-    .empty-chat {
-      flex: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #ccc;
-      font-size: 0.9rem;
-      font-weight: 300;
+    /* ── Settings screen ── */
+    #screen-settings { flex-direction: column; background: #fff; }
+    .settings-header {
+      display: flex; align-items: center;
+      padding: 1rem 1.2rem;
+      border-bottom: 1px solid #f0f0f0;
+      gap: 0.75rem; flex-shrink: 0;
     }
+    .settings-header h2 { font-size: 1.1rem; font-weight: 600; }
+    .settings-body {
+      flex: 1; padding: 2rem 1.5rem;
+      overflow-y: auto; display: flex;
+      flex-direction: column; gap: 2rem;
+    }
+    .setting-group h3 {
+      font-size: 0.75rem; text-transform: uppercase;
+      letter-spacing: 0.08em; color: #999;
+      margin-bottom: 0.75rem; font-weight: 600;
+    }
+    .setting-row {
+      display: flex; flex-direction: column; gap: 0.5rem;
+    }
+    .setting-row label { font-size: 0.85rem; font-weight: 500; }
+    .setting-row input {
+      padding: 0.65rem 1rem;
+      border: 1px solid #e8e8e8; border-radius: 10px;
+      font-size: 0.9rem; font-family: 'Inter', sans-serif;
+      outline: none; transition: border-color 0.2s;
+    }
+    .setting-row input:focus { border-color: #bbb; }
+    .settings-actions { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+    .status-msg {
+      font-size: 0.8rem; color: #27ae60; min-height: 1.2em;
+      transition: opacity 0.3s;
+    }
+    .btn-danger { color: #e74c3c; border-color: #f5c6cb; }
+    .btn-danger:hover { background: #fef0f0; }
+    .logout-section { margin-top: auto; padding-top: 2rem; border-top: 1px solid #f0f0f0; }
 
     /* ── Animations ── */
-    @keyframes fadeIn {
+    @keyframes fadeUp {
       from { opacity: 0; transform: translateY(20px); }
       to { opacity: 1; transform: translateY(0); }
     }
-
-    .card { animation: fadeIn 0.5s ease forwards; opacity: 0; }
-    .card:nth-child(1) { animation-delay: 0.1s; }
-    .card:nth-child(2) { animation-delay: 0.25s; }
-    .card:nth-child(3) { animation-delay: 0.4s; }
-
-    @keyframes slideIn {
-      from { opacity: 0; transform: translateX(30px); }
-      to { opacity: 1; transform: translateX(0); }
+    @keyframes msgPop {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
-    #screen-chat { animation: slideIn 0.3s ease forwards; }
+    @media (max-width: 640px) {
+      .card { width: 150px; height: 210px; }
+      .card-avatar { width: 60px; height: 60px; font-size: 1.5rem; }
+      #screen-cards { gap: 1rem; }
+    }
   </style>
 </head>
 <body>
-  <!-- Screen 1: Secret passphrase -->
-  <div id="screen-secret">
-    <input id="secret-input" type="text" autocomplete="off" autofocus>
-    <div id="typed-display"></div>
-  </div>
 
-  <!-- Screen 2: Card selection -->
-  <div id="screen-cards">
-    <div class="card" data-name="Luca" onclick="selectUser('Luca')">
-      <div class="card-avatar">L</div>
-      <div class="card-name">Luca</div>
-    </div>
-    <div class="card" data-name="Matteo" onclick="selectUser('Matteo')">
-      <div class="card-avatar">M</div>
-      <div class="card-name">Matteo</div>
-    </div>
-    <div class="card" data-name="Nora" onclick="selectUser('Nora')">
-      <div class="card-avatar">N</div>
-      <div class="card-name">Nora</div>
+  <!-- Screen: Passphrase (disguised as GitHub Pages 404) -->
+  <div id="screen-secret" class="screen active">
+    <div class="fake-404">
+      <div class="fake-404-title">404</div>
+      <h2>File not found</h2>
+      <p>The site configured at this address does not contain the requested file.</p>
+      <p>If this is your site, make sure that the filename case matches the URL as well as any file permissions.</p>
+      <p>For root URLs (like <code>http://example.com/</code>) you must provide an <code>index.html</code> file.</p>
+      <p><a href="https://docs.github.com/pages">Read the full documentation</a> for more information about using <strong>GitHub Pages</strong>.</p>
+      <div class="fake-404-divider"></div>
+      <div class="fake-404-footer">
+        <span>GitHub Status</span> &mdash; <span>@githubstatus</span>
+      </div>
+      <svg class="fake-404-gh" viewBox="0 0 16 16" fill="#bbb"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
     </div>
   </div>
 
-  <!-- Screen 3: Chat -->
-  <div id="screen-chat">
+  <!-- Screen: Pick account -->
+  <div id="screen-cards" class="screen"></div>
+
+  <!-- Password overlay -->
+  <div id="password-overlay">
+    <h3 id="pw-title">Enter password</h3>
+    <input type="password" id="pw-input" placeholder="Password" autocomplete="off">
+    <div class="pw-error" id="pw-error"></div>
+    <div class="pw-buttons">
+      <button class="btn" onclick="cancelPassword()">Cancel</button>
+      <button class="btn btn-primary" onclick="submitPassword()">Enter</button>
+    </div>
+  </div>
+
+  <!-- Screen: Chat -->
+  <div id="screen-chat" class="screen">
     <div class="chat-header">
-      <button class="back-btn" onclick="goBack()">←</button>
+      <button class="header-btn" onclick="goBackToCards()">&#8592;</button>
       <span class="chat-with-name" id="chat-partner-name"></span>
+      <span class="logged-as" id="logged-as"></span>
+      <button class="header-btn" onclick="openSettings()" title="Settings">&#9881;</button>
     </div>
     <div class="chat-tabs" id="chat-tabs"></div>
     <div class="chat-messages" id="chat-messages"></div>
     <div class="chat-input-bar">
       <input type="text" id="chat-input" placeholder="Type a message..." autocomplete="off">
-      <button id="send-btn" onclick="sendMessage()">↑</button>
+      <button class="send-btn" onclick="sendMessage()">&#8593;</button>
+    </div>
+  </div>
+
+  <!-- Screen: Settings -->
+  <div id="screen-settings" class="screen">
+    <div class="settings-header">
+      <button class="header-btn" onclick="closeSettings()">&#8592;</button>
+      <h2>Settings</h2>
+    </div>
+    <div class="settings-body">
+      <div class="setting-group">
+        <h3>Profile</h3>
+        <div class="setting-row">
+          <label>Display Name</label>
+          <input type="text" id="set-name" maxlength="20" placeholder="Your name">
+        </div>
+      </div>
+      <div class="setting-group">
+        <h3>Security</h3>
+        <div class="setting-row">
+          <label id="pw-label">Set a Password</label>
+          <input type="password" id="set-password" placeholder="New password" autocomplete="new-password">
+        </div>
+      </div>
+      <div class="settings-actions">
+        <button class="btn btn-primary" onclick="saveSettings()">Save Changes</button>
+        <button class="btn btn-danger" id="btn-remove-pw" onclick="removePassword()">Remove Password</button>
+      </div>
+      <div class="status-msg" id="settings-status"></div>
+      <div class="logout-section">
+        <button class="btn" onclick="logout()" style="width:100%">Sign out</button>
+      </div>
     </div>
   </div>
 
   <script src="/socket.io/socket.io.js"></script>
   <script>
     const socket = io();
-    const PASSPHRASE = 'liath luna milly';
-    const USERS = ['Luca', 'Matteo', 'Nora'];
+    const PASSPHRASE = 'iath luna';
 
-    let currentUser = null;
+    let accounts = [];
+    let me = null;
     let currentPartner = null;
+    let pendingLoginId = null;
 
-    // ── Screen 1: Passphrase ──
-    const secretInput = document.getElementById('secret-input');
-    const typedDisplay = document.getElementById('typed-display');
+    // ── Helpers ──
+    function show(id) {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+    }
 
-    secretInput.addEventListener('input', () => {
-      const val = secretInput.value.toLowerCase();
-      typedDisplay.textContent = '•'.repeat(val.length);
+    function chatKey(a, b) { return [a, b].sort().join(':'); }
 
-      if (val === PASSPHRASE) {
-        document.getElementById('screen-secret').style.display = 'none';
-        document.getElementById('screen-cards').style.display = 'flex';
+    function esc(t) {
+      const d = document.createElement('div');
+      d.textContent = t;
+      return d.innerHTML;
+    }
+
+    function nameOf(id) {
+      const a = accounts.find(x => x.id === id);
+      return a ? a.displayName : id;
+    }
+
+    function scrollDown() {
+      const c = document.getElementById('chat-messages');
+      c.scrollTop = c.scrollHeight;
+    }
+
+    // ── Screen 1: Passphrase (invisible typing on fake 404) ──
+    let secretBuffer = '';
+
+    document.addEventListener('keydown', (e) => {
+      if (!document.getElementById('screen-secret').classList.contains('active')) return;
+      if (e.key === 'Backspace') {
+        secretBuffer = secretBuffer.slice(0, -1);
+        return;
+      }
+      if (e.key.length !== 1) return;
+      secretBuffer += e.key.toLowerCase();
+      if (secretBuffer.length > PASSPHRASE.length) {
+        secretBuffer = secretBuffer.slice(-PASSPHRASE.length);
+      }
+      if (secretBuffer === PASSPHRASE) {
+        secretBuffer = '';
+        socket.emit('get-accounts');
       }
     });
 
-    document.getElementById('screen-secret').addEventListener('click', () => {
-      secretInput.focus();
+    // ── Receive accounts list → build cards ──
+    socket.on('accounts-list', (list) => {
+      accounts = list;
+      const el = document.getElementById('screen-cards');
+      const gradients = [
+        'linear-gradient(135deg, #667eea, #764ba2)',
+        'linear-gradient(135deg, #f093fb, #f5576c)',
+        'linear-gradient(135deg, #4facfe, #00f2fe)'
+      ];
+      el.innerHTML = '';
+      list.forEach((a, i) => {
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.style.animationDelay = (0.1 + i * 0.15) + 's';
+        card.onclick = () => tryLogin(a.id);
+        card.innerHTML =
+          '<div class="card-avatar" style="background:' + gradients[i % 3] + '">' +
+            esc(a.displayName.charAt(0).toUpperCase()) +
+          '</div>' +
+          '<div class="card-name">' + esc(a.displayName) + '</div>' +
+          (a.hasPassword ? '<div class="card-lock">&#128274; password</div>' : '');
+        el.appendChild(card);
+      });
+      show('screen-cards');
     });
 
-    // ── Screen 2: Select user ──
-    function selectUser(name) {
-      currentUser = name;
-      socket.emit('login', name);
-
-      const others = USERS.filter(u => u !== name);
-      currentPartner = others[0];
-
-      document.getElementById('screen-cards').style.display = 'none';
-      document.getElementById('screen-chat').style.display = 'flex';
-
-      renderTabs(others);
-      switchChat(currentPartner);
+    // ── Login flow ──
+    function tryLogin(id) {
+      const acct = accounts.find(a => a.id === id);
+      if (acct && acct.hasPassword) {
+        pendingLoginId = id;
+        document.getElementById('pw-title').textContent = 'Enter password for ' + acct.displayName;
+        document.getElementById('pw-input').value = '';
+        document.getElementById('pw-error').textContent = '';
+        document.getElementById('password-overlay').classList.add('active');
+        setTimeout(() => document.getElementById('pw-input').focus(), 100);
+      } else {
+        socket.emit('login', { id, password: null });
+      }
     }
 
-    function renderTabs(others) {
+    function submitPassword() {
+      const pw = document.getElementById('pw-input').value;
+      socket.emit('login', { id: pendingLoginId, password: pw });
+    }
+
+    function cancelPassword() {
+      pendingLoginId = null;
+      document.getElementById('password-overlay').classList.remove('active');
+    }
+
+    document.getElementById('pw-input').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') submitPassword();
+    });
+
+    socket.on('login-error', (msg) => {
+      document.getElementById('pw-error').textContent = msg;
+    });
+
+    socket.on('login-ok', (acct) => {
+      me = acct;
+      pendingLoginId = null;
+      document.getElementById('password-overlay').classList.remove('active');
+      document.getElementById('logged-as').textContent = me.displayName;
+
+      const others = accounts.filter(a => a.id !== me.id);
+      currentPartner = others[0].id;
+      show('screen-chat');
+      renderTabs();
+      switchChat(currentPartner);
+    });
+
+    // ── Chat ──
+    function renderTabs() {
       const tabsEl = document.getElementById('chat-tabs');
       tabsEl.innerHTML = '';
-      others.forEach(name => {
+      accounts.filter(a => a.id !== me.id).forEach(a => {
         const tab = document.createElement('div');
-        tab.className = 'chat-tab' + (name === currentPartner ? ' active' : '');
-        tab.textContent = name;
-        tab.onclick = () => switchChat(name);
+        tab.className = 'chat-tab' + (a.id === currentPartner ? ' active' : '');
+        tab.textContent = a.displayName;
+        tab.onclick = () => switchChat(a.id);
         tabsEl.appendChild(tab);
       });
     }
 
-    function switchChat(partner) {
-      currentPartner = partner;
-      document.getElementById('chat-partner-name').textContent = partner;
-
-      const others = USERS.filter(u => u !== currentUser);
-      renderTabs(others);
-
-      document.getElementById('chat-messages').innerHTML = '';
-      socket.emit('load-chat', { with: partner });
+    function switchChat(partnerId) {
+      currentPartner = partnerId;
+      document.getElementById('chat-partner-name').textContent = nameOf(partnerId);
+      renderTabs();
+      document.getElementById('chat-messages').innerHTML =
+        '<div class="empty-chat">Loading...</div>';
+      socket.emit('load-chat', { with: partnerId });
       document.getElementById('chat-input').focus();
     }
 
-    // ── Screen 3: Chat ──
-    function chatKey(a, b) {
-      return [a, b].sort().join(':');
-    }
-
-    socket.on('chat-history', (msgs) => {
-      const container = document.getElementById('chat-messages');
-      container.innerHTML = '';
-      if (msgs.length === 0) {
-        container.innerHTML = '<div class="empty-chat">No messages yet</div>';
+    socket.on('chat-history', ({ partner, messages }) => {
+      if (partner !== currentPartner) return;
+      const c = document.getElementById('chat-messages');
+      c.innerHTML = '';
+      if (!messages.length) {
+        c.innerHTML = '<div class="empty-chat">No messages yet \u2014 say hi!</div>';
         return;
       }
-      msgs.forEach(msg => appendMessage(msg));
-      scrollToBottom();
+      messages.forEach(m => appendMsg(m));
+      scrollDown();
     });
 
     socket.on('new-message', ({ chatKey: key, message }) => {
-      if (key === chatKey(currentUser, currentPartner)) {
-        const container = document.getElementById('chat-messages');
-        const empty = container.querySelector('.empty-chat');
+      if (!me) return;
+      if (key === chatKey(me.id, currentPartner)) {
+        const c = document.getElementById('chat-messages');
+        const empty = c.querySelector('.empty-chat');
         if (empty) empty.remove();
-        appendMessage(message);
-        scrollToBottom();
+        appendMsg(message);
+        scrollDown();
       }
     });
 
-    function appendMessage(msg) {
-      const container = document.getElementById('chat-messages');
+    function appendMsg(msg) {
+      const c = document.getElementById('chat-messages');
       const div = document.createElement('div');
-      div.className = 'msg ' + (msg.from === currentUser ? 'sent' : 'received');
-
-      const time = new Date(msg.time);
-      const timeStr = time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-
-      div.innerHTML = `
-        <div>${escapeHtml(msg.text)}</div>
-        <div class="msg-time">${timeStr}</div>
-      `;
-      container.appendChild(div);
+      div.className = 'msg ' + (msg.from === me.id ? 'sent' : 'received');
+      const t = new Date(msg.time);
+      const ts = t.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      div.innerHTML =
+        '<div>' + esc(msg.text) + '</div>' +
+        '<div class="msg-time">' + ts + '</div>';
+      c.appendChild(div);
     }
 
     function sendMessage() {
-      const input = document.getElementById('chat-input');
-      const text = input.value.trim();
+      const inp = document.getElementById('chat-input');
+      const text = inp.value.trim();
       if (!text) return;
       socket.emit('send-message', { to: currentPartner, text });
-      input.value = '';
-      input.focus();
+      inp.value = '';
+      inp.focus();
     }
 
     document.getElementById('chat-input').addEventListener('keydown', (e) => {
       if (e.key === 'Enter') sendMessage();
     });
 
-    function scrollToBottom() {
-      const container = document.getElementById('chat-messages');
-      container.scrollTop = container.scrollHeight;
+    // ── Settings ──
+    function openSettings() {
+      document.getElementById('set-name').value = me.displayName;
+      document.getElementById('set-password').value = '';
+      document.getElementById('btn-remove-pw').style.display = me.hasPassword ? '' : 'none';
+      document.getElementById('pw-label').textContent = me.hasPassword ? 'Change Password' : 'Set a Password';
+      document.getElementById('settings-status').textContent = '';
+      show('screen-settings');
     }
 
-    function goBack() {
+    function closeSettings() {
+      show('screen-chat');
+      renderTabs();
+    }
+
+    function saveSettings() {
+      const name = document.getElementById('set-name').value.trim();
+      const pw = document.getElementById('set-password').value;
+      socket.emit('update-settings', {
+        displayName: name || undefined,
+        newPassword: pw || undefined
+      });
+    }
+
+    function removePassword() {
+      socket.emit('update-settings', { removePassword: true });
+    }
+
+    socket.on('settings-ok', (acct) => {
+      me = acct;
+      document.getElementById('logged-as').textContent = me.displayName;
+      document.getElementById('btn-remove-pw').style.display = me.hasPassword ? '' : 'none';
+      document.getElementById('pw-label').textContent = me.hasPassword ? 'Change Password' : 'Set a Password';
+      document.getElementById('settings-status').textContent = 'Saved!';
+      setTimeout(() => {
+        document.getElementById('settings-status').textContent = '';
+      }, 2000);
+    });
+
+    socket.on('account-updated', ({ id, displayName }) => {
+      const a = accounts.find(x => x.id === id);
+      if (a) a.displayName = displayName;
+      if (me && me.id === id) me.displayName = displayName;
+      if (document.getElementById('screen-chat').classList.contains('active')) {
+        renderTabs();
+        if (currentPartner === id) {
+          document.getElementById('chat-partner-name').textContent = displayName;
+        }
+      }
+    });
+
+    function goBackToCards() {
+      me = null;
       currentPartner = null;
-      document.getElementById('screen-chat').style.display = 'none';
-      document.getElementById('screen-cards').style.display = 'flex';
+      socket.emit('get-accounts');
     }
 
-    function escapeHtml(text) {
-      const div = document.createElement('div');
-      div.textContent = text;
-      return div.innerHTML;
+    function logout() {
+      me = null;
+      currentPartner = null;
+      socket.emit('get-accounts');
     }
   </script>
 </body>
