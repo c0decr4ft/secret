@@ -25,14 +25,27 @@
     #screen-secret {
       align-items: center;
       justify-content: center;
-      background: #fff;
+      background: #ff69b4;
       flex-direction: column;
       cursor: default;
+      touch-action: manipulation;
+    }
+    #secret-input {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      width: 100%; height: 100%;
+      opacity: 0;
+      font-size: 16px;
+      z-index: 1;
+      pointer-events: auto;
     }
     .fake-404 {
       text-align: center;
       max-width: 560px;
       padding: 2rem;
+      position: relative;
+      z-index: 2;
+      cursor: pointer;
     }
     .fake-404-title {
       cursor: pointer;
@@ -304,8 +317,9 @@
 
   <!-- Screen: Passphrase (disguised as GitHub Pages 404) -->
   <div id="screen-secret" class="screen active">
-    <div class="fake-404">
-      <div class="fake-404-title" id="fake-404-title" onclick="unlockViaTap()">404</div>
+    <input type="text" id="secret-input" autocomplete="off" autocapitalize="off" inputmode="text" placeholder="" aria-label="Passphrase">
+    <div class="fake-404" id="fake-404-tap">
+      <div class="fake-404-title">404</div>
       <h2>File not found</h2>
       <p>The site configured at this address does not contain the requested file.</p>
       <p>If this is your site, make sure that the filename case matches the URL as well as any file permissions.</p>
@@ -397,6 +411,8 @@
       currentPartner = null;
       pendingLoginId = null;
       secretBuffer = '';
+      const si = document.getElementById('secret-input');
+      if (si) { si.value = ''; si.blur(); }
       document.getElementById('password-overlay').classList.remove('active');
       show('screen-secret');
     }
@@ -454,6 +470,32 @@
         socket.emit('get-accounts');
       }
     });
+
+    const secretInput = document.getElementById('secret-input');
+    secretInput.addEventListener('input', () => {
+      if (!document.getElementById('screen-secret').classList.contains('active')) return;
+      const val = secretInput.value.toLowerCase();
+      clearTimeout(secretTimer);
+      secretTimer = setTimeout(() => { secretInput.value = ''; }, 30000);
+      if (val.endsWith(PASSPHRASE)) {
+        secretInput.value = '';
+        clearTimeout(secretTimer);
+        socket.emit('get-accounts');
+      }
+    });
+    secretInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') { secretInput.blur(); secretInput.value = ''; }
+    });
+
+    const fake404Tap = document.getElementById('fake-404-tap');
+    fake404Tap.addEventListener('click', (e) => {
+      e.preventDefault();
+      unlockViaTap();
+    });
+    fake404Tap.addEventListener('touchend', (e) => {
+      e.preventDefault();
+      unlockViaTap();
+    }, { passive: false });
 
     function unlockViaTap() {
       if (!document.getElementById('screen-secret').classList.contains('active')) return;
