@@ -6,7 +6,10 @@
     },
     "chats": {
       ".read": true,
-      ".write": true
+      ".write": true,
+      "$chatId": {
+        ".indexOn": ["time"]
+      }
     }
   }
 }

@@ -79,6 +79,8 @@
       flex-wrap: wrap;
       padding: 2rem;
       background: #fff url('assets/background.png') center/cover no-repeat;
+      position: relative;
+      z-index: 1;
     }
     .card {
       width: 160px;
@@ -94,6 +96,9 @@
       touch-action: manipulation;
       -webkit-tap-highlight-color: transparent;
       user-select: none;
+      position: relative;
+      z-index: 2;
+      pointer-events: auto;
     }
     .card:hover { background: #eee; }
     .card-avatar {
@@ -434,6 +439,15 @@
       focusCodeInput();
     }, { passive: false });
 
+    const cardsEl = document.getElementById('screen-cards');
+    cardsEl.addEventListener('click', handleCardTap);
+    cardsEl.addEventListener('touchend', function(e) {
+      if (e.target.closest('.card')) {
+        e.preventDefault();
+        handleCardTap(e);
+      }
+    }, { passive: false });
+
     // Type "liath" to unlock → immediately show the three cards
     function checkAndUnlock() {
       const inp = document.getElementById('code-input');
@@ -479,6 +493,17 @@
     });
     codeInput.addEventListener('change', checkAndUnlock);
 
+    let lastCardTap = 0;
+    function handleCardTap(e) {
+      const card = e.target.closest('.card');
+      if (card) {
+        const now = Date.now();
+        if (now - lastCardTap < 400) return;
+        lastCardTap = now;
+        const id = card.getAttribute('data-account-id');
+        if (id) tryLogin(id);
+      }
+    }
     function buildCards() {
       const el = document.getElementById('screen-cards');
       const colors = ['#667eea', '#f5576c', '#4facfe'];
@@ -487,15 +512,7 @@
         const card = document.createElement('div');
         card.className = 'card';
         card.setAttribute('role', 'button');
-        const doSelect = () => tryLogin(a.id);
-        card.addEventListener('click', doSelect);
-        card.addEventListener('touchend', function(e) {
-          e.preventDefault();
-          doSelect();
-        }, { passive: false });
-        card.addEventListener('keydown', function(e) {
-          if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); doSelect(); }
-        });
+        card.setAttribute('data-account-id', a.id);
         card.innerHTML = '<div class="card-avatar" style="background:' + colors[i % 3] + '">' + esc(a.displayName[0]) + '</div><div class="card-name">' + esc(a.displayName) + '</div>' + (a.hasPassword ? '<div style="font-size:0.7rem;color:#bbb;margin-top:0.5rem">&#128274; password</div>' : '');
         el.appendChild(card);
       });
@@ -604,6 +621,7 @@
       div.innerHTML = '<div>' + esc(msg.text) + '</div><div class="msg-time">' + ts + '</div>';
       c.appendChild(div);
       c.scrollTop = c.scrollHeight;
+      return div;
     }
 
     function sendMessage() {
@@ -617,15 +635,19 @@
       // Show message immediately (optimistic update)
       const empty = document.querySelector('.empty-chat');
       if (empty) empty.remove();
-      appendMsg(msg);
-
+      const msgEl = appendMsg(msg);
       inp.value = '';
       inp.focus();
 
-      db.ref('chats/' + key).push(msg).catch(err => {
-        console.error('Send failed:', err);
-        alert('Could not send. Check Firebase rules allow read/write.');
-      });
+      db.ref('chats/' + key).push(msg)
+        .then(() => { /* sent; Firebase real-time syncs to all devices */ })
+        .catch(err => {
+          console.error('Send failed:', err);
+          msgEl.remove();
+          inp.value = text;
+          inp.focus();
+          alert('Could not send. Check your connection and try again.');
+        });
     }
 
     document.getElementById('chat-input').addEventListener('keydown', e => {
@@ -660,7 +682,8 @@
       currentPartner = null;
       accounts = Object.keys(DEFAULT_ACCOUNTS).map(k => ({
         id: k,
-        displayName: DEFAULT_ACCOUNTS[k].displayName
+        displayName: DEFAULT_ACCOUNTS[k].displayName,
+        hasPassword: !!(DEFAULT_ACCOUNTS[k].password)
       }));
       buildCards();
       show('screen-cards');
