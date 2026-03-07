@@ -210,10 +210,9 @@
       return d.innerHTML;
     }
 
-    // Type "liath" to unlock
+    // Type "liath" to unlock → show the three cards
     document.getElementById('code-input').addEventListener('input', function() {
       if (this.value.toLowerCase().trim() === PASSPHRASE) {
-        this.value = '';
         loadAccounts();
       }
     });
@@ -225,7 +224,18 @@
           return;
         }
         const data = snap.val();
-        accounts = Object.keys(data).map(k => ({ id: k, displayName: data[k].displayName }));
+        accounts = Object.keys(data).map(k => ({
+          id: k,
+          displayName: (data[k] && data[k].displayName) || k
+        }));
+        if (accounts.length === 0) {
+          accounts = Object.keys(DEFAULT_ACCOUNTS).map(k => ({
+            id: k,
+            displayName: DEFAULT_ACCOUNTS[k].displayName
+          }));
+        }
+        document.getElementById('code-input').value = '';
+        document.getElementById('code-input').blur();
         buildCards();
         show('screen-cards');
       });
