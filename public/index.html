@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Secret Chat</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #fff;
+      height: 100vh;
+      overflow: hidden;
+      color: #1a1a1a;
+    }
+
+    /* ── Secret input screen ── */
+    #screen-secret {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      width: 100vw;
+      background: #fff;
+    }
+
+    #secret-input {
+      position: absolute;
+      opacity: 0;
+      pointer-events: all;
+      width: 100%;
+      height: 100%;
+      cursor: default;
+    }
+
+    #typed-display {
+      font-size: 1.1rem;
+      letter-spacing: 0.3em;
+      color: #ccc;
+      font-weight: 300;
+      transition: opacity 0.3s;
+    }
+
+    /* ── Card selection screen ── */
+    #screen-cards {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      width: 100vw;
+      background: #fff;
+      gap: 2rem;
+      flex-wrap: wrap;
+    }
+
+    .card {
+      width: 200px;
+      height: 280px;
+      background: #fafafa;
+      border: 1px solid #e8e8e8;
+      border-radius: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.08);
+      border-color: #d0d0d0;
+    }
+
+    .card:active {
+      transform: translateY(-2px) scale(0.98);
+    }
+
+    .card-avatar {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 1.2rem;
+    }
+
+    .card:nth-child(1) .card-avatar { background: linear-gradient(135deg, #667eea, #764ba2); }
+    .card:nth-child(2) .card-avatar { background: linear-gradient(135deg, #f093fb, #f5576c); }
+    .card:nth-child(3) .card-avatar { background: linear-gradient(135deg, #4facfe, #00f2fe); }
+
+    .card-name {
+      font-size: 1.2rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+    }
+
+    /* ── Chat screen ── */
+    #screen-chat {
+      display: none;
+      flex-direction: column;
+      height: 100vh;
+      width: 100vw;
+      background: #fff;
+    }
+
+    .chat-header {
+      display: flex;
+      align-items: center;
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid #f0f0f0;
+      gap: 1rem;
+    }
+
+    .back-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: 1px solid #e8e8e8;
+      background: #fff;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+      font-size: 1rem;
+      color: #666;
+    }
+
+    .back-btn:hover { background: #f5f5f5; }
+
+    .chat-with-name {
+      font-weight: 600;
+      font-size: 1.05rem;
+    }
+
+    .chat-tabs {
+      display: flex;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .chat-tab {
+      flex: 1;
+      padding: 0.75rem;
+      text-align: center;
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+      color: #999;
+      border-bottom: 2px solid transparent;
+      transition: all 0.2s;
+    }
+
+    .chat-tab:hover { color: #666; }
+    .chat-tab.active { color: #1a1a1a; border-bottom-color: #1a1a1a; }
+
+    .chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+
+    .msg {
+      max-width: 75%;
+      padding: 0.7rem 1rem;
+      border-radius: 18px;
+      font-size: 0.9rem;
+      line-height: 1.4;
+      word-wrap: break-word;
+    }
+
+    .msg.sent {
+      align-self: flex-end;
+      background: #1a1a1a;
+      color: #fff;
+      border-bottom-right-radius: 4px;
+    }
+
+    .msg.received {
+      align-self: flex-start;
+      background: #f2f2f2;
+      color: #1a1a1a;
+      border-bottom-left-radius: 4px;
+    }
+
+    .msg-time {
+      font-size: 0.65rem;
+      opacity: 0.5;
+      margin-top: 0.2rem;
+    }
+
+    .msg.sent .msg-time { text-align: right; }
+
+    .chat-input-bar {
+      display: flex;
+      padding: 1rem 1.5rem;
+      gap: 0.75rem;
+      border-top: 1px solid #f0f0f0;
+      align-items: center;
+    }
+
+    #chat-input {
+      flex: 1;
+      padding: 0.7rem 1rem;
+      border: 1px solid #e8e8e8;
+      border-radius: 24px;
+      font-size: 0.9rem;
+      font-family: 'Inter', sans-serif;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    #chat-input:focus { border-color: #bbb; }
+
+    #send-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: none;
+      background: #1a1a1a;
+      color: #fff;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+      font-size: 1.1rem;
+    }
+
+    #send-btn:hover { background: #333; }
+
+    .empty-chat {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #ccc;
+      font-size: 0.9rem;
+      font-weight: 300;
+    }
+
+    /* ── Animations ── */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .card { animation: fadeIn 0.5s ease forwards; opacity: 0; }
+    .card:nth-child(1) { animation-delay: 0.1s; }
+    .card:nth-child(2) { animation-delay: 0.25s; }
+    .card:nth-child(3) { animation-delay: 0.4s; }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateX(30px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    #screen-chat { animation: slideIn 0.3s ease forwards; }
+  </style>
+</head>
+<body>
+  <!-- Screen 1: Secret passphrase -->
+  <div id="screen-secret">
+    <input id="secret-input" type="text" autocomplete="off" autofocus>
+    <div id="typed-display"></div>
+  </div>
+
+  <!-- Screen 2: Card selection -->
+  <div id="screen-cards">
+    <div class="card" data-name="Luca" onclick="selectUser('Luca')">
+      <div class="card-avatar">L</div>
+      <div class="card-name">Luca</div>
+    </div>
+    <div class="card" data-name="Matteo" onclick="selectUser('Matteo')">
+      <div class="card-avatar">M</div>
+      <div class="card-name">Matteo</div>
+    </div>
+    <div class="card" data-name="Nora" onclick="selectUser('Nora')">
+      <div class="card-avatar">N</div>
+      <div class="card-name">Nora</div>
+    </div>
+  </div>
+
+  <!-- Screen 3: Chat -->
+  <div id="screen-chat">
+    <div class="chat-header">
+      <button class="back-btn" onclick="goBack()">←</button>
+      <span class="chat-with-name" id="chat-partner-name"></span>
+    </div>
+    <div class="chat-tabs" id="chat-tabs"></div>
+    <div class="chat-messages" id="chat-messages"></div>
+    <div class="chat-input-bar">
+      <input type="text" id="chat-input" placeholder="Type a message..." autocomplete="off">
+      <button id="send-btn" onclick="sendMessage()">↑</button>
+    </div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+    const PASSPHRASE = 'liath luna milly';
+    const USERS = ['Luca', 'Matteo', 'Nora'];
+
+    let currentUser = null;
+    let currentPartner = null;
+
+    // ── Screen 1: Passphrase ──
+    const secretInput = document.getElementById('secret-input');
+    const typedDisplay = document.getElementById('typed-display');
+
+    secretInput.addEventListener('input', () => {
+      const val = secretInput.value.toLowerCase();
+      typedDisplay.textContent = '•'.repeat(val.length);
+
+      if (val === PASSPHRASE) {
+        document.getElementById('screen-secret').style.display = 'none';
+        document.getElementById('screen-cards').style.display = 'flex';
+      }
+    });
+
+    document.getElementById('screen-secret').addEventListener('click', () => {
+      secretInput.focus();
+    });
+
+    // ── Screen 2: Select user ──
+    function selectUser(name) {
+      currentUser = name;
+      socket.emit('login', name);
+
+      const others = USERS.filter(u => u !== name);
+      currentPartner = others[0];
+
+      document.getElementById('screen-cards').style.display = 'none';
+      document.getElementById('screen-chat').style.display = 'flex';
+
+      renderTabs(others);
+      switchChat(currentPartner);
+    }
+
+    function renderTabs(others) {
+      const tabsEl = document.getElementById('chat-tabs');
+      tabsEl.innerHTML = '';
+      others.forEach(name => {
+        const tab = document.createElement('div');
+        tab.className = 'chat-tab' + (name === currentPartner ? ' active' : '');
+        tab.textContent = name;
+        tab.onclick = () => switchChat(name);
+        tabsEl.appendChild(tab);
+      });
+    }
+
+    function switchChat(partner) {
+      currentPartner = partner;
+      document.getElementById('chat-partner-name').textContent = partner;
+
+      const others = USERS.filter(u => u !== currentUser);
+      renderTabs(others);
+
+      document.getElementById('chat-messages').innerHTML = '';
+      socket.emit('load-chat', { with: partner });
+      document.getElementById('chat-input').focus();
+    }
+
+    // ── Screen 3: Chat ──
+    function chatKey(a, b) {
+      return [a, b].sort().join(':');
+    }
+
+    socket.on('chat-history', (msgs) => {
+      const container = document.getElementById('chat-messages');
+      container.innerHTML = '';
+      if (msgs.length === 0) {
+        container.innerHTML = '<div class="empty-chat">No messages yet</div>';
+        return;
+      }
+      msgs.forEach(msg => appendMessage(msg));
+      scrollToBottom();
+    });
+
+    socket.on('new-message', ({ chatKey: key, message }) => {
+      if (key === chatKey(currentUser, currentPartner)) {
+        const container = document.getElementById('chat-messages');
+        const empty = container.querySelector('.empty-chat');
+        if (empty) empty.remove();
+        appendMessage(message);
+        scrollToBottom();
+      }
+    });
+
+    function appendMessage(msg) {
+      const container = document.getElementById('chat-messages');
+      const div = document.createElement('div');
+      div.className = 'msg ' + (msg.from === currentUser ? 'sent' : 'received');
+
+      const time = new Date(msg.time);
+      const timeStr = time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+      div.innerHTML = `
+        <div>${escapeHtml(msg.text)}</div>
+        <div class="msg-time">${timeStr}</div>
+      `;
+      container.appendChild(div);
+    }
+
+    function sendMessage() {
+      const input = document.getElementById('chat-input');
+      const text = input.value.trim();
+      if (!text) return;
+      socket.emit('send-message', { to: currentPartner, text });
+      input.value = '';
+      input.focus();
+    }
+
+    document.getElementById('chat-input').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') sendMessage();
+    });
+
+    function scrollToBottom() {
+      const container = document.getElementById('chat-messages');
+      container.scrollTop = container.scrollHeight;
+    }
+
+    function goBack() {
+      currentPartner = null;
+      document.getElementById('screen-chat').style.display = 'none';
+      document.getElementById('screen-cards').style.display = 'flex';
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+  </script>
+</body>
+</html>
