@@ -34,17 +34,15 @@
       top: 0; left: 0; right: 0; bottom: 0;
       width: 100%; height: 100%;
       opacity: 0;
-      font-size: 16px; /* prevents iOS zoom on focus */
-      z-index: 1;
+      font-size: 16px;
+      z-index: 2;
       pointer-events: auto;
     }
     .fake-404 {
       text-align: center;
       max-width: 560px;
       padding: 2rem;
-      position: relative;
-      z-index: 2;
-      cursor: pointer;
+      pointer-events: none;
     }
     .fake-404-title {
       font-size: 120px;
@@ -309,7 +307,7 @@
 <body>
 
   <div id="screen-secret" class="screen active">
-    <input type="text" id="secret-input" autocomplete="off" autocapitalize="off" inputmode="text" placeholder="" aria-label="Passphrase">
+    <input type="text" id="secret-input" autocomplete="off" autocapitalize="off" inputmode="text" tabindex="-1" aria-hidden="true">
     <div class="fake-404" id="fake-404-tap">
       <div class="fake-404-title">404</div>
       <h2>File not found</h2>
@@ -437,6 +435,9 @@
     function show(id) {
       document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
       document.getElementById(id).classList.add('active');
+      if (id === 'screen-secret') {
+        setTimeout(() => document.getElementById('secret-input')?.focus(), 50);
+      }
     }
 
     function chatKey(a, b) { return [a, b].sort().join('_'); }
@@ -496,19 +497,8 @@
       if (e.key === 'Escape') { secretInput.blur(); secretInput.value = ''; }
     });
 
-    const fake404Tap = document.getElementById('fake-404-tap');
-    fake404Tap.addEventListener('click', (e) => {
-      e.preventDefault();
-      unlockViaTap();
-    });
-    fake404Tap.addEventListener('touchend', (e) => {
-      e.preventDefault();
-      unlockViaTap();
-    }, { passive: false });
-
-    function unlockViaTap() {
-      if (!document.getElementById('screen-secret').classList.contains('active')) return;
-      loadAccountsAndShowCards();
+    if (document.getElementById('screen-secret').classList.contains('active')) {
+      setTimeout(() => document.getElementById('secret-input')?.focus(), 50);
     }
 
     // ── Firebase: load accounts ──
