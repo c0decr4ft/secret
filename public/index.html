@@ -35,6 +35,9 @@
       padding: 2rem;
     }
     .fake-404-title {
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
       font-size: 120px;
       font-weight: 200;
       color: #bbb;
@@ -302,7 +305,7 @@
   <!-- Screen: Passphrase (disguised as GitHub Pages 404) -->
   <div id="screen-secret" class="screen active">
     <div class="fake-404">
-      <div class="fake-404-title">404</div>
+      <div class="fake-404-title" id="fake-404-title" onclick="unlockViaTap()">404</div>
       <h2>File not found</h2>
       <p>The site configured at this address does not contain the requested file.</p>
       <p>If this is your site, make sure that the filename case matches the URL as well as any file permissions.</p>
@@ -381,7 +384,7 @@
   <script src="/socket.io/socket.io.js"></script>
   <script>
     const socket = io();
-    const PASSPHRASE = 'liath luna';
+    const PASSPHRASE = 'liath';
 
     let accounts = [];
     let me = null;
@@ -451,6 +454,11 @@
         socket.emit('get-accounts');
       }
     });
+
+    function unlockViaTap() {
+      if (!document.getElementById('screen-secret').classList.contains('active')) return;
+      socket.emit('get-accounts');
+    }
 
     // ── Receive accounts list → build cards ──
     socket.on('accounts-list', (list) => {

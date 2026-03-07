@@ -41,6 +41,9 @@
       line-height: 1;
       margin-bottom: 20px;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
     }
     .fake-404 h2 {
       font-size: 20px;
@@ -295,7 +298,7 @@
 
   <div id="screen-secret" class="screen active">
     <div class="fake-404">
-      <div class="fake-404-title">404</div>
+      <div class="fake-404-title" id="fake-404-title" onclick="unlockViaTap()">404</div>
       <h2>File not found</h2>
       <p>The site configured at this address does not contain the requested file.</p>
       <p>If this is your site, make sure that the filename case matches the URL as well as any file permissions.</p>
@@ -387,7 +390,7 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    const PASSPHRASE = 'liath luna';
+    const PASSPHRASE = 'liath';
     const DEFAULT_ACCOUNTS = {
       luca:   { id: 'luca',   displayName: 'Luca',   password: '' },
       matteo: { id: 'matteo', displayName: 'Matteo', password: '' },
@@ -461,6 +464,11 @@
         loadAccountsAndShowCards();
       }
     });
+
+    function unlockViaTap() {
+      if (!document.getElementById('screen-secret').classList.contains('active')) return;
+      loadAccountsAndShowCards();
+    }
 
     // ── Firebase: load accounts ──
     function loadAccountsAndShowCards() {
