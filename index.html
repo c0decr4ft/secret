@@ -10,7 +10,7 @@
     .screen { display: none; height: 100vh; flex-direction: column; }
     .screen.active { display: flex; }
 
-    /* Original GitHub 404 look */
+    /* GitHub 404 look */
     #screen-secret {
       align-items: center;
       justify-content: center;
@@ -18,301 +18,80 @@
       padding: 2rem;
     }
     .fake-404 { text-align: center; max-width: 560px; }
-    .fake-404 .title {
-      font-size: 120px;
-      font-weight: 200;
-      color: #bbb;
-      letter-spacing: -5px;
-      line-height: 1;
-      margin-bottom: 20px;
-    }
+    .fake-404 .title { font-size: 120px; font-weight: 200; color: #bbb; letter-spacing: -5px; line-height: 1; margin-bottom: 20px; }
     .fake-404 h2 { font-size: 20px; font-weight: 600; color: #666; margin-bottom: 14px; }
     .fake-404 p { font-size: 15px; color: #999; line-height: 1.6; margin-bottom: 8px; }
     .fake-404 p code { background: #eee; padding: 2px 6px; border-radius: 3px; font-size: 14px; }
     .fake-404 a { color: #4078c0; text-decoration: none; }
-    /* White line = tappable input. Tap (mobile) or click (desktop) to type */
     .line-wrap {
-      width: 60px;
-      min-height: 44px;
-      margin: 30px auto;
-      position: relative;
-      cursor: pointer;
-      border-bottom: 1px solid #ddd;
-      touch-action: manipulation;
-      -webkit-tap-highlight-color: transparent;
+      width: 60px; min-height: 44px; margin: 30px auto; position: relative; cursor: pointer;
+      border-bottom: 1px solid #ddd; touch-action: manipulation; -webkit-tap-highlight-color: transparent;
     }
     #code-input {
-      position: absolute;
-      left: 0;
-      right: 0;
-      top: 0;
-      bottom: 0;
-      width: 100%;
-      min-height: 44px;
-      border: none;
-      background: transparent;
-      font-size: 16px;
-      color: transparent;
-      opacity: 0.01;
-      cursor: pointer;
+      position: absolute; left: 0; right: 0; top: 0; bottom: 0; width: 100%; min-height: 44px;
+      border: none; background: transparent; font-size: 16px; color: transparent; opacity: 0.01; cursor: pointer;
     }
     #code-input:focus {
-      outline: none;
-      width: 200px;
-      left: 50%;
-      margin-left: -100px;
-      min-height: 2.5rem;
-      opacity: 1;
-      color: #333;
-      background: #fff;
-      border: 1px solid #ddd;
-      border-radius: 6px;
-      padding: 0 0.8rem;
+      outline: none; width: 200px; left: 50%; margin-left: -100px; min-height: 2.5rem;
+      opacity: 1; color: #333; background: #fff; border: 1px solid #ddd; border-radius: 6px; padding: 0 0.8rem;
     }
     .fake-404-footer { font-size: 13px; color: #bbb; margin-top: 16px; }
 
     /* Cards */
     #screen-cards {
-      align-items: center;
-      justify-content: center;
-      gap: 1.5rem;
-      flex-wrap: wrap;
-      padding: 2rem;
+      align-items: center; justify-content: center; gap: 1.5rem; flex-wrap: wrap; padding: 2rem;
       background: #fff url('assets/background.png') center/cover no-repeat;
-      position: relative;
-      z-index: 1;
     }
     .card {
-      width: 160px;
-      height: 200px;
-      background: #f5f5f5;
-      border: 1px solid #ddd;
-      border-radius: 12px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      touch-action: manipulation;
-      -webkit-tap-highlight-color: transparent;
-      user-select: none;
-      position: relative;
-      z-index: 2;
-      pointer-events: auto;
+      width: 160px; height: 200px; background: #f5f5f5; border: 1px solid #ddd; border-radius: 12px;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      cursor: pointer; touch-action: manipulation; -webkit-tap-highlight-color: transparent;
     }
     .card:hover { background: #eee; }
     .card-avatar {
-      width: 60px;
-      height: 60px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.5rem;
-      font-weight: bold;
-      color: #fff;
-      margin-bottom: 0.8rem;
+      width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      font-size: 1.5rem; font-weight: bold; color: #fff; margin-bottom: 0.8rem;
     }
     .card-name { font-weight: 600; }
 
-    /* Chat - original style */
+    /* Chat */
     #screen-chat { flex-direction: column; background: #fff; }
     .chat-header {
-      display: flex;
-      align-items: center;
-      padding: 1rem 1.2rem;
-      border-bottom: 1px solid #f0f0f0;
-      gap: 0.75rem;
-      flex-shrink: 0;
+      display: flex; align-items: center; padding: 1rem 1.2rem; border-bottom: 1px solid #f0f0f0; gap: 0.75rem; flex-shrink: 0;
     }
     .header-btn {
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      border: 1px solid #e8e8e8;
-      background: #fff;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1rem;
-      color: #666;
+      width: 36px; height: 36px; border-radius: 50%; border: 1px solid #e8e8e8; background: #fff; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; font-size: 1rem; color: #666;
     }
     .header-btn:hover { background: #f5f5f5; }
     .chat-with-name { font-weight: 600; font-size: 1.05rem; flex: 1; }
     .logged-as { font-size: 0.7rem; color: #bbb; }
-    .chat-tabs {
-      display: flex;
-      border-bottom: 1px solid #f0f0f0;
-      flex-shrink: 0;
-    }
+    .chat-tabs { display: flex; border-bottom: 1px solid #f0f0f0; flex-shrink: 0; }
     .chat-tab {
-      flex: 1;
-      padding: 0.75rem;
-      text-align: center;
-      font-size: 0.85rem;
-      font-weight: 500;
-      cursor: pointer;
-      color: #999;
-      border-bottom: 2px solid transparent;
+      flex: 1; padding: 0.75rem; text-align: center; font-size: 0.85rem; font-weight: 500; cursor: pointer;
+      color: #999; border-bottom: 2px solid transparent;
     }
     .chat-tab:hover { color: #666; }
     .chat-tab.active { color: #1a1a1a; border-bottom-color: #1a1a1a; }
     .chat-messages {
-      flex: 1;
-      overflow-y: auto;
-      padding: 1.5rem;
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-      -webkit-overflow-scrolling: touch;
+      flex: 1; min-height: 100px; overflow-y: auto; padding: 1.5rem; display: flex; flex-direction: column;
+      gap: 0.5rem; -webkit-overflow-scrolling: touch;
     }
-    .msg {
-      max-width: 75%;
-      padding: 0.65rem 1rem;
-      border-radius: 18px;
-      font-size: 0.9rem;
-      line-height: 1.4;
-      word-wrap: break-word;
-    }
-    .msg.sent {
-      align-self: flex-end;
-      background: #1a1a1a;
-      color: #fff;
-      border-bottom-right-radius: 4px;
-    }
-    .msg.received {
-      align-self: flex-start;
-      background: #f2f2f2;
-      color: #1a1a1a;
-      border-bottom-left-radius: 4px;
-    }
+    .msg { max-width: 75%; padding: 0.65rem 1rem; border-radius: 18px; font-size: 0.9rem; line-height: 1.4; word-wrap: break-word; }
+    .msg.sent { align-self: flex-end; background: #1a1a1a; color: #fff; border-bottom-right-radius: 4px; }
+    .msg.received { align-self: flex-start; background: #f2f2f2; color: #1a1a1a; border-bottom-left-radius: 4px; }
     .msg-time { font-size: 0.6rem; opacity: 0.45; margin-top: 0.15rem; }
-    .msg.sent .msg-time { text-align: right; }
-    .empty-chat {
-      flex: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #d0d0d0;
-      font-size: 0.85rem;
-      font-weight: 300;
-    }
+    .empty-chat { flex: 1; display: flex; align-items: center; justify-content: center; color: #999; font-size: 0.9rem; }
     .chat-input-bar {
-      display: flex;
-      padding: 1rem 1.2rem;
-      gap: 0.6rem;
-      border-top: 1px solid #f0f0f0;
-      align-items: center;
-      flex-shrink: 0;
+      display: flex; padding: 1rem 1.2rem; gap: 0.6rem; border-top: 1px solid #f0f0f0; align-items: center; flex-shrink: 0;
     }
-    #chat-input {
-      flex: 1;
-      padding: 0.65rem 1rem;
-      border: 1px solid #e8e8e8;
-      border-radius: 24px;
-      font-size: 0.9rem;
-      outline: none;
-    }
+    #chat-input { flex: 1; padding: 0.65rem 1rem; border: 1px solid #e8e8e8; border-radius: 24px; font-size: 0.9rem; outline: none; }
     #chat-input:focus { border-color: #bbb; }
     .send-btn {
-      width: 38px;
-      height: 38px;
-      border-radius: 50%;
-      border: none;
-      background: #1a1a1a;
-      color: #fff;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.1rem;
-      flex-shrink: 0;
+      width: 38px; height: 38px; border-radius: 50%; border: none; background: #1a1a1a; color: #fff; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0;
     }
     .send-btn:hover { background: #333; }
-
-    /* Password overlay */
-    #password-overlay {
-      display: none;
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(255,255,255,0.95);
-      align-items: center;
-      justify-content: center;
-      flex-direction: column;
-      gap: 1rem;
-      z-index: 100;
-    }
-    #password-overlay.active { display: flex; }
-    #password-overlay h3 { font-size: 1.1rem; font-weight: 600; }
-    #password-overlay input {
-      padding: 0.7rem 1.2rem;
-      border: 1px solid #e0e0e0;
-      border-radius: 12px;
-      font-size: 0.95rem;
-      width: 240px;
-      text-align: center;
-    }
-    .pw-error { color: #e74c3c; font-size: 0.8rem; min-height: 1.2em; }
-    .pw-buttons { display: flex; gap: 0.75rem; }
-    .btn {
-      padding: 0.6rem 1.5rem;
-      border: 1px solid #e0e0e0;
-      border-radius: 10px;
-      background: #fff;
-      font-size: 0.85rem;
-      font-weight: 500;
-      cursor: pointer;
-    }
-    .btn:hover { background: #f5f5f5; }
-    .btn-primary { background: #1a1a1a; color: #fff; border-color: #1a1a1a; }
-    .btn-primary:hover { background: #333; }
-
-    /* Settings screen */
-    #screen-settings { flex-direction: column; background: #fff; }
-    .settings-header {
-      display: flex;
-      align-items: center;
-      padding: 1rem 1.2rem;
-      border-bottom: 1px solid #f0f0f0;
-      gap: 0.75rem;
-    }
-    .settings-header h2 { font-size: 1.1rem; font-weight: 600; }
-    .settings-body {
-      flex: 1;
-      padding: 2rem 1.5rem;
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-      gap: 2rem;
-    }
-    .setting-group h3 {
-      font-size: 0.75rem;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: #999;
-      margin-bottom: 0.75rem;
-      font-weight: 600;
-    }
-    .setting-row {
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-    }
-    .setting-row label { font-size: 0.85rem; font-weight: 500; }
-    .setting-row input {
-      padding: 0.65rem 1rem;
-      border: 1px solid #e8e8e8;
-      border-radius: 10px;
-      font-size: 0.9rem;
-      outline: none;
-    }
-    .setting-row input:focus { border-color: #bbb; }
-    .settings-actions { display: flex; gap: 0.75rem; flex-wrap: wrap; }
-    .status-msg { font-size: 0.8rem; color: #27ae60; min-height: 1.2em; }
-    .btn-danger { color: #e74c3c; border-color: #f5c6cb; }
-    .btn-danger:hover { background: #fef0f0; }
-    .logout-section { margin-top: auto; padding-top: 2rem; border-top: 1px solid #f0f0f0; }
   </style>
 </head>
 <body>
@@ -332,16 +111,10 @@
     </div>
   </div>
 
-  <div id="screen-cards" class="screen"></div>
-
-  <div id="password-overlay">
-    <h3 id="pw-title">Enter password</h3>
-    <input type="password" id="pw-input" placeholder="Password" autocomplete="off">
-    <div class="pw-error" id="pw-error"></div>
-    <div class="pw-buttons">
-      <button class="btn" onclick="cancelPassword()">Cancel</button>
-      <button class="btn btn-primary" onclick="submitPassword()">Enter</button>
-    </div>
+  <div id="screen-cards" class="screen">
+    <div class="card" data-id="luca" data-name="Luca"><span class="card-avatar" style="background:#667eea">L</span><span class="card-name">Luca</span></div>
+    <div class="card" data-id="matteo" data-name="Matteo"><span class="card-avatar" style="background:#f5576c">M</span><span class="card-name">Matteo</span></div>
+    <div class="card" data-id="nora" data-name="Nora"><span class="card-avatar" style="background:#4facfe">N</span><span class="card-name">Nora</span></div>
   </div>
 
   <div id="screen-chat" class="screen">
@@ -349,7 +122,6 @@
       <button class="header-btn" onclick="goBack()">&#8592;</button>
       <span class="chat-with-name" id="chat-partner-name"></span>
       <span class="logged-as" id="logged-as"></span>
-      <button class="header-btn" onclick="openSettings()" title="Settings">&#9881;</button>
     </div>
     <div class="chat-tabs" id="chat-tabs"></div>
     <div class="chat-messages" id="chat-messages"></div>
@@ -359,40 +131,16 @@
     </div>
   </div>
 
-  <div id="screen-settings" class="screen">
-    <div class="settings-header">
-      <button class="header-btn" onclick="closeSettings()">&#8592;</button>
-      <h2>Settings</h2>
-    </div>
-    <div class="settings-body">
-      <div class="setting-group">
-        <h3>Profile</h3>
-        <div class="setting-row">
-          <label>Display Name</label>
-          <input type="text" id="set-name" maxlength="20" placeholder="Your name">
-        </div>
-      </div>
-      <div class="setting-group">
-        <h3>Security</h3>
-        <div class="setting-row">
-          <label id="pw-label">Set a Password</label>
-          <input type="password" id="set-password" placeholder="New password" autocomplete="new-password">
-        </div>
-      </div>
-      <div class="settings-actions">
-        <button class="btn btn-primary" onclick="saveSettings()">Save Changes</button>
-        <button class="btn btn-danger" id="btn-remove-pw" onclick="removePassword()">Remove Password</button>
-      </div>
-      <div class="status-msg" id="settings-status"></div>
-      <div class="logout-section">
-        <button class="btn" onclick="logout()" style="width:100%">Sign out</button>
-      </div>
-    </div>
-  </div>
-
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
   <script>
+    const PASSPHRASE = 'liath';
+    const PEOPLE = [
+      { id: 'luca', name: 'Luca' },
+      { id: 'matteo', name: 'Matteo' },
+      { id: 'nora', name: 'Nora' }
+    ];
+
     const firebaseConfig = {
       apiKey: "AIzaSyBky-dq76Uic181p8BUwAN-rVyJ9Brte4w",
       authDomain: "secret-chat-app-9f5db.firebaseapp.com",
@@ -405,16 +153,7 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    const PASSPHRASE = 'liath';
-    const DEFAULT_ACCOUNTS = {
-      luca: { id: 'luca', displayName: 'Luca', password: '' },
-      matteo: { id: 'matteo', displayName: 'Matteo', password: '' },
-      nora: { id: 'nora', displayName: 'Nora', password: '' }
-    };
-
-    let accounts = [];
     let me = null;
-    let pendingLoginId = null;
     let currentPartner = null;
     let chatListenerRef = null;
 
@@ -423,167 +162,51 @@
       document.getElementById(id).classList.add('active');
     }
 
-    function esc(t) {
-      const d = document.createElement('div');
-      d.textContent = t;
-      return d.innerHTML;
-    }
+    document.getElementById('line-wrap').addEventListener('click', () => document.getElementById('code-input').focus());
+    document.getElementById('line-wrap').addEventListener('touchend', e => { e.preventDefault(); document.getElementById('code-input').focus(); }, { passive: false });
 
-    // Mobile + desktop: tap/click line to focus input and bring up keyboard
-    function focusCodeInput() {
-      document.getElementById('code-input').focus();
-    }
-    document.getElementById('line-wrap').addEventListener('click', focusCodeInput);
-    document.getElementById('line-wrap').addEventListener('touchend', function(e) {
-      e.preventDefault();
-      focusCodeInput();
-    }, { passive: false });
-
-    const cardsEl = document.getElementById('screen-cards');
-    cardsEl.addEventListener('click', handleCardTap);
-    cardsEl.addEventListener('touchend', function(e) {
-      if (e.target.closest('.card')) {
-        e.preventDefault();
-        handleCardTap(e);
-      }
-    }, { passive: false });
-
-    // Type "liath" to unlock → immediately show the three cards
     function checkAndUnlock() {
-      const inp = document.getElementById('code-input');
-      const val = inp.value.toLowerCase().replace(/\s+/g, ' ').trim();
+      const val = document.getElementById('code-input').value.toLowerCase().replace(/\s+/g, ' ').trim();
       if (val === PASSPHRASE || val.endsWith(PASSPHRASE)) {
-        inp.value = '';
-        inp.blur();
-        accounts = Object.keys(DEFAULT_ACCOUNTS).map(k => ({
-          id: k,
-          displayName: DEFAULT_ACCOUNTS[k].displayName,
-          hasPassword: !!(DEFAULT_ACCOUNTS[k].password)
-        }));
-        buildCards();
+        document.getElementById('code-input').value = '';
+        document.getElementById('code-input').blur();
         show('screen-cards');
-        db.ref('accounts').once('value', snap => {
-          if (!snap.exists()) {
-            db.ref('accounts').set(DEFAULT_ACCOUNTS).then(() => {
-              accounts = Object.keys(DEFAULT_ACCOUNTS).map(k => ({
-                id: k,
-                displayName: DEFAULT_ACCOUNTS[k].displayName,
-                hasPassword: !!(DEFAULT_ACCOUNTS[k].password)
-              }));
-              buildCards();
-            });
-          } else {
-            const data = snap.val();
-            accounts = Object.keys(data).map(k => ({
-              id: k,
-              displayName: (data[k] && data[k].displayName) || k,
-              hasPassword: !!(data[k] && data[k].password)
-            }));
-            buildCards();
-          }
-        });
       }
     }
 
-    const codeInput = document.getElementById('code-input');
-    codeInput.addEventListener('input', checkAndUnlock);
-    codeInput.addEventListener('keyup', function() {
-      checkAndUnlock();
-      setTimeout(checkAndUnlock, 150);
-    });
-    codeInput.addEventListener('change', checkAndUnlock);
+    document.getElementById('code-input').addEventListener('input', checkAndUnlock);
+    document.getElementById('code-input').addEventListener('keyup', () => { checkAndUnlock(); setTimeout(checkAndUnlock, 150); });
+    document.getElementById('code-input').addEventListener('change', checkAndUnlock);
 
-    let lastCardTap = 0;
-    function handleCardTap(e) {
-      const card = e.target.closest('.card');
-      if (card) {
-        const now = Date.now();
-        if (now - lastCardTap < 400) return;
-        lastCardTap = now;
-        const id = card.getAttribute('data-account-id');
-        if (id) tryLogin(id);
-      }
-    }
-    function buildCards() {
-      const el = document.getElementById('screen-cards');
-      const colors = ['#667eea', '#f5576c', '#4facfe'];
-      el.innerHTML = '';
-      accounts.forEach((a, i) => {
-        const card = document.createElement('div');
-        card.className = 'card';
-        card.setAttribute('role', 'button');
-        card.setAttribute('data-account-id', a.id);
-        card.innerHTML = '<div class="card-avatar" style="background:' + colors[i % 3] + '">' + esc(a.displayName[0]) + '</div><div class="card-name">' + esc(a.displayName) + '</div>' + (a.hasPassword ? '<div style="font-size:0.7rem;color:#bbb;margin-top:0.5rem">&#128274; password</div>' : '');
-        el.appendChild(card);
-      });
-    }
-
-    function tryLogin(id) {
-      const acct = accounts.find(a => a.id === id);
-      if (!acct) return;
-      if (acct.hasPassword) {
-        pendingLoginId = id;
-        document.getElementById('pw-title').textContent = 'Enter password for ' + acct.displayName;
-        document.getElementById('pw-input').value = '';
-        document.getElementById('pw-error').textContent = '';
-        document.getElementById('password-overlay').classList.add('active');
-        setTimeout(() => document.getElementById('pw-input').focus(), 100);
-      } else {
-        doLogin(id, null);
-      }
-    }
-
-    function submitPassword() {
-      const pw = document.getElementById('pw-input').value;
-      doLogin(pendingLoginId, pw);
-    }
-
-    function cancelPassword() {
-      pendingLoginId = null;
-      document.getElementById('password-overlay').classList.remove('active');
-    }
-
-    document.getElementById('pw-input').addEventListener('keydown', e => {
-      if (e.key === 'Enter') submitPassword();
+    // Card clicks
+    document.querySelectorAll('.card').forEach(card => {
+      card.addEventListener('click', () => openChat(card.dataset.id, card.dataset.name));
+      card.addEventListener('touchend', e => { e.preventDefault(); openChat(card.dataset.id, card.dataset.name); }, { passive: false });
     });
 
-    function doLogin(id, password) {
-      db.ref('accounts/' + id).once('value', snap => {
-        const acct = snap.val();
-        if (!acct) return;
-        if (acct.password && acct.password !== password) {
-          document.getElementById('pw-error').textContent = 'Wrong password';
-          return;
-        }
-        me = {
-          id: acct.id,
-          displayName: acct.displayName,
-          hasPassword: !!(acct.password)
-        };
-        pendingLoginId = null;
-        document.getElementById('password-overlay').classList.remove('active');
-        document.getElementById('logged-as').textContent = me.displayName;
-        const others = accounts.filter(a => a.id !== id);
-        currentPartner = others[0]?.id;
-        if (!currentPartner) return;
-        show('screen-chat');
-        switchChat(currentPartner);
-      });
+    function openChat(myId, myName) {
+      me = { id: myId, name: myName };
+      document.getElementById('logged-as').textContent = myName;
+      const others = PEOPLE.filter(p => p.id !== myId);
+      currentPartner = others[0].id;
+      show('screen-chat');
+      renderTabs();
+      switchChat(currentPartner);
     }
 
     function nameOf(id) {
-      const a = accounts.find(x => x.id === id);
-      return a ? a.displayName : id;
+      const p = PEOPLE.find(x => x.id === id);
+      return p ? p.name : id;
     }
 
     function renderTabs() {
       const tabs = document.getElementById('chat-tabs');
       tabs.innerHTML = '';
-      accounts.filter(a => a.id !== me.id).forEach(a => {
+      PEOPLE.filter(p => p.id !== me.id).forEach(p => {
         const tab = document.createElement('div');
-        tab.className = 'chat-tab' + (a.id === currentPartner ? ' active' : '');
-        tab.textContent = a.displayName;
-        tab.onclick = () => switchChat(a.id);
+        tab.className = 'chat-tab' + (p.id === currentPartner ? ' active' : '');
+        tab.textContent = p.name;
+        tab.onclick = () => switchChat(p.id);
         tabs.appendChild(tab);
       });
     }
@@ -612,16 +235,20 @@
       document.getElementById('chat-input').focus();
     }
 
+    function esc(t) {
+      const d = document.createElement('div');
+      d.textContent = t;
+      return d.innerHTML;
+    }
+
     function appendMsg(msg) {
       const c = document.getElementById('chat-messages');
       const div = document.createElement('div');
       div.className = 'msg ' + (msg.from === me.id ? 'sent' : 'received');
-      const t = new Date(msg.time);
-      const ts = t.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      const ts = new Date(msg.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
       div.innerHTML = '<div>' + esc(msg.text) + '</div><div class="msg-time">' + ts + '</div>';
       c.appendChild(div);
       c.scrollTop = c.scrollHeight;
-      return div;
     }
 
     function sendMessage() {
@@ -632,148 +259,27 @@
       const key = [me.id, currentPartner].sort().join('_');
       const msg = { from: me.id, text, time: Date.now() };
 
-      // Show message immediately (optimistic update)
       const empty = document.querySelector('.empty-chat');
       if (empty) empty.remove();
-      const msgEl = appendMsg(msg);
+      appendMsg(msg);
       inp.value = '';
       inp.focus();
 
-      db.ref('chats/' + key).push(msg)
-        .then(() => { /* sent; Firebase real-time syncs to all devices */ })
-        .catch(err => {
-          console.error('Send failed:', err);
-          msgEl.remove();
-          inp.value = text;
-          inp.focus();
-          alert('Could not send. Check your connection and try again.');
-        });
+      db.ref('chats/' + key).push(msg).catch(err => {
+        alert('Could not send. Check your connection.');
+        inp.value = text;
+      });
     }
 
     document.getElementById('chat-input').addEventListener('keydown', e => {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        sendMessage();
-      }
-    });
-
-    // Refresh chat when user returns to tab (helps with real-time on mobile)
-    document.addEventListener('visibilitychange', () => {
-      if (document.visibilityState === 'visible' && me && currentPartner) {
-        const key = [me.id, currentPartner].sort().join('_');
-        db.ref('chats/' + key).orderByChild('time').once('value', snap => {
-          const c = document.getElementById('chat-messages');
-          if (!c || !document.getElementById('screen-chat').classList.contains('active')) return;
-          const data = snap.val();
-          c.innerHTML = '';
-          if (!data) {
-            c.innerHTML = '<div class="empty-chat">No messages yet — say hi!</div>';
-          } else {
-            Object.values(data).sort((a, b) => a.time - b.time).forEach(m => appendMsg(m));
-          }
-          c.scrollTop = c.scrollHeight;
-        });
-      }
+      if (e.key === 'Enter') { e.preventDefault(); sendMessage(); }
     });
 
     function goBack() {
       if (chatListenerRef) chatListenerRef.off();
       me = null;
       currentPartner = null;
-      accounts = Object.keys(DEFAULT_ACCOUNTS).map(k => ({
-        id: k,
-        displayName: DEFAULT_ACCOUNTS[k].displayName,
-        hasPassword: !!(DEFAULT_ACCOUNTS[k].password)
-      }));
-      buildCards();
       show('screen-cards');
-      db.ref('accounts').once('value', snap => {
-        if (snap.exists()) {
-          const data = snap.val();
-          accounts = Object.keys(data).map(k => ({
-            id: k,
-            displayName: (data[k] && data[k].displayName) || k,
-            hasPassword: !!(data[k] && data[k].password)
-          }));
-          buildCards();
-        }
-      });
-    }
-
-    function openSettings() {
-      document.getElementById('set-name').value = me.displayName;
-      document.getElementById('set-password').value = '';
-      document.getElementById('btn-remove-pw').style.display = me.hasPassword ? '' : 'none';
-      document.getElementById('pw-label').textContent = me.hasPassword ? 'Change Password' : 'Set a Password';
-      document.getElementById('settings-status').textContent = '';
-      show('screen-settings');
-    }
-
-    function closeSettings() {
-      show('screen-chat');
-      renderTabs();
-    }
-
-    function saveSettings() {
-      const name = document.getElementById('set-name').value.trim();
-      const pw = document.getElementById('set-password').value;
-
-      const updates = {};
-      if (name) updates.displayName = name.substring(0, 20);
-      if (pw) updates.password = pw;
-
-      if (Object.keys(updates).length === 0) return;
-
-      db.ref('accounts/' + me.id).update(updates).then(() => {
-        if (name) me.displayName = name.substring(0, 20);
-        if (pw) me.hasPassword = true;
-        const a = accounts.find(x => x.id === me.id);
-        if (a) a.displayName = me.displayName;
-        if (a) a.hasPassword = !!pw;
-        document.getElementById('logged-as').textContent = me.displayName;
-        document.getElementById('btn-remove-pw').style.display = me.hasPassword ? '' : 'none';
-        document.getElementById('pw-label').textContent = me.hasPassword ? 'Change Password' : 'Set a Password';
-        document.getElementById('settings-status').textContent = 'Saved!';
-        setTimeout(() => { document.getElementById('settings-status').textContent = ''; }, 2000);
-      });
-    }
-
-    function removePassword() {
-      db.ref('accounts/' + me.id).update({ password: '' }).then(() => {
-        me.hasPassword = false;
-        const a = accounts.find(x => x.id === me.id);
-        if (a) a.hasPassword = false;
-        document.getElementById('btn-remove-pw').style.display = 'none';
-        document.getElementById('pw-label').textContent = 'Set a Password';
-        document.getElementById('settings-status').textContent = 'Password removed!';
-        setTimeout(() => { document.getElementById('settings-status').textContent = ''; }, 2000);
-      });
-    }
-
-    function logout() {
-      if (chatListenerRef) chatListenerRef.off();
-      me = null;
-      currentPartner = null;
-      pendingLoginId = null;
-      document.getElementById('password-overlay').classList.remove('active');
-      accounts = Object.keys(DEFAULT_ACCOUNTS).map(k => ({
-        id: k,
-        displayName: DEFAULT_ACCOUNTS[k].displayName,
-        hasPassword: !!(DEFAULT_ACCOUNTS[k].password)
-      }));
-      buildCards();
-      show('screen-cards');
-      db.ref('accounts').once('value', snap => {
-        if (snap.exists()) {
-          const data = snap.val();
-          accounts = Object.keys(data).map(k => ({
-            id: k,
-            displayName: (data[k] && data[k].displayName) || k,
-            hasPassword: !!(data[k] && data[k].password)
-          }));
-          buildCards();
-        }
-      });
     }
   </script>
 </body>
