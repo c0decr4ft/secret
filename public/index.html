@@ -125,6 +125,11 @@
       display: flex; flex-direction: column;
       align-items: center; justify-content: center;
       cursor: pointer;
+      font-family: inherit;
+      padding: 0;
+      margin: 0;
+      appearance: none;
+      -webkit-appearance: none;
       transition: all 0.3s cubic-bezier(0.25,0.46,0.45,0.94);
       animation: fadeUp 0.5s ease forwards;
       opacity: 0;
@@ -479,6 +484,10 @@
       if (secretBuffer.endsWith(PASSPHRASE)) {
         secretBuffer = '';
         clearTimeout(secretTimer);
+        if (!socket.connected) {
+          alert('Server not connected. Run "npm start" in the project folder, then open http://localhost:3000');
+          return;
+        }
         socket.emit('get-accounts');
       }
     });
@@ -512,6 +521,10 @@
       if (val === PASSPHRASE || val.endsWith(PASSPHRASE)) {
         secretInput.value = '';
         clearTimeout(secretTimer);
+        if (!socket.connected) {
+          alert('Server not connected. Run "npm start" in the project folder, then open http://localhost:3000');
+          return;
+        }
         socket.emit('get-accounts');
       }
     });
@@ -522,6 +535,12 @@
     if (document.getElementById('screen-secret').classList.contains('active')) {
       setTimeout(() => document.getElementById('secret-input')?.focus(), 50);
     }
+
+    socket.on('connect_error', () => {
+      if (document.getElementById('screen-cards').classList.contains('active') || document.getElementById('screen-secret').classList.contains('active')) {
+        console.warn('Server not connected. Run: npm start, then open http://localhost:3000');
+      }
+    });
 
     // ── Receive accounts list → build cards ──
     socket.on('accounts-list', (list) => {
@@ -534,10 +553,11 @@
       ];
       el.innerHTML = '';
       list.forEach((a, i) => {
-        const card = document.createElement('div');
+        const card = document.createElement('button');
+        card.type = 'button';
         card.className = 'card';
         card.style.animationDelay = (0.1 + i * 0.15) + 's';
-        card.onclick = () => tryLogin(a.id);
+        card.dataset.accountId = a.id;
         card.innerHTML =
           '<div class="card-avatar" style="background:' + gradients[i % 3] + '">' +
             esc(a.displayName.charAt(0).toUpperCase()) +
@@ -548,6 +568,21 @@
       });
       show('screen-cards');
     });
+
+    document.getElementById('screen-cards').addEventListener('click', (e) => {
+      const card = e.target.closest('.card[data-account-id]');
+      if (card) {
+        e.preventDefault();
+        tryLogin(card.dataset.accountId);
+      }
+    });
+    document.getElementById('screen-cards').addEventListener('touchend', (e) => {
+      const card = e.target.closest('.card[data-account-id]');
+      if (card) {
+        e.preventDefault();
+        tryLogin(card.dataset.accountId);
+      }
+    }, { passive: false });
 
     // ── Login flow ──
     function tryLogin(id) {
@@ -633,13 +668,13 @@
 
     socket.on('new-message', ({ chatKey: key, message }) => {
       if (!me) return;
-      if (key === chatKey(me.id, currentPartner)) {
-        const c = document.getElementById('chat-messages');
-        const empty = c.querySelector('.empty-chat');
-        if (empty) empty.remove();
-        appendMsg(message);
-        scrollDown();
-      }
+      if (key !== chatKey(me.id, currentPartner)) return;
+      if (message.from === me.id) return;
+      const c = document.getElementById('chat-messages');
+      const empty = c.querySelector('.empty-chat');
+      if (empty) empty.remove();
+      appendMsg(message);
+      scrollDown();
     });
 
     function appendMsg(msg) {
@@ -657,10 +692,14 @@
     function sendMessage() {
       const inp = document.getElementById('chat-input');
       const text = inp.value.trim();
-      if (!text) return;
-      socket.emit('send-message', { to: currentPartner, text });
+      if (!text || !me || !currentPartner) return;
+      const msg = { from: me.id, text, time: Date.now() };
+      const empty = document.getElementById('chat-messages').querySelector('.empty-chat');
+      if (empty) empty.remove();
+      appendMsg(msg);
       inp.value = '';
       inp.focus();
+      socket.emit('send-message', { to: currentPartner, text });
     }
 
     document.getElementById('chat-input').addEventListener('keydown', (e) => {

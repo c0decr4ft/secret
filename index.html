@@ -48,6 +48,7 @@
       cursor: pointer; touch-action: manipulation; -webkit-tap-highlight-color: transparent;
     }
     .card:hover { background: #eee; }
+    button.card { padding: 0; margin: 0; font-family: inherit; cursor: pointer; appearance: none; -webkit-appearance: none; }
     .card-avatar {
       width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
       font-size: 1.5rem; font-weight: bold; color: #fff; margin-bottom: 0.8rem;
@@ -140,9 +141,9 @@
   </div>
 
   <div id="screen-cards" class="screen">
-    <div class="card" data-id="luca"><span class="card-avatar" style="background:#667eea">L</span><span class="card-name">Luca</span></div>
-    <div class="card" data-id="matteo"><span class="card-avatar" style="background:#f5576c">M</span><span class="card-name">Matteo</span></div>
-    <div class="card" data-id="nora"><span class="card-avatar" style="background:#4facfe">N</span><span class="card-name">Nora</span></div>
+    <button type="button" class="card" data-id="luca" onclick="openChat('luca')"><span class="card-avatar" style="background:#667eea">L</span><span class="card-name">Luca</span></button>
+    <button type="button" class="card" data-id="matteo" onclick="openChat('matteo')"><span class="card-avatar" style="background:#f5576c">M</span><span class="card-name">Matteo</span></button>
+    <button type="button" class="card" data-id="nora" onclick="openChat('nora')"><span class="card-avatar" style="background:#4facfe">N</span><span class="card-name">Nora</span></button>
   </div>
 
   <div id="password-overlay">
@@ -222,6 +223,19 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
     const DB_URL = firebaseConfig.databaseURL.replace(/\/$/, '');
+    const STORAGE_KEY = 'secret_chat_';
+
+    function getLocalMessages(key) {
+      try {
+        const s = localStorage.getItem(STORAGE_KEY + key);
+        return s ? JSON.parse(s) : [];
+      } catch (e) { return []; }
+    }
+    function saveLocalMessage(key, msg) {
+      const msgs = getLocalMessages(key);
+      msgs.push(msg);
+      try { localStorage.setItem(STORAGE_KEY + key, JSON.stringify(msgs)); } catch (e) {}
+    }
 
     let accounts = [];
     let me = null;
@@ -294,11 +308,7 @@
       });
     }
 
-    document.querySelectorAll('.card').forEach(card => {
-      const open = () => tryLogin(card.dataset.id);
-      card.addEventListener('pointerdown', e => { e.preventDefault(); open(); });
-      card.addEventListener('click', e => { e.preventDefault(); open(); });
-    });
+    window.openChat = function(id) { tryLogin(id); };
 
     function tryLogin(id) {
       const acct = accounts.find(a => a.id === id) || { id, displayName: id.charAt(0).toUpperCase() + id.slice(1), hasPassword: false };
@@ -391,23 +401,37 @@
 
       const key = [me.id, partnerId].sort().join('_');
       const c = document.getElementById('chat-messages');
-      c.innerHTML = '<div class="empty-chat">No messages yet — say hi!</div>';
+      const localMsgs = getLocalMessages(key);
+      if (localMsgs.length > 0) {
+        c.innerHTML = '';
+        localMsgs.sort((a, b) => (a.time || 0) - (b.time || 0)).forEach(m => appendMsg(m));
+      } else {
+        c.innerHTML = '<div class="empty-chat">No messages yet — say hi!</div>';
+      }
       document.getElementById('chat-input').focus();
 
       function loadMessages() {
+        const local = getLocalMessages(key);
         fetch(DB_URL + '/chats/' + key + '.json').then(r => r.json()).then(data => {
           if (!c || !document.getElementById('screen-chat').classList.contains('active')) return;
-          c.innerHTML = '';
-          if (!data || typeof data !== 'object') {
-            c.innerHTML = '<div class="empty-chat">No messages yet — say hi!</div>';
-          } else {
-            const msgs = Object.values(data).filter(m => m && m.text);
-            msgs.sort((a, b) => (a.time || 0) - (b.time || 0));
-            if (msgs.length === 0) c.innerHTML = '<div class="empty-chat">No messages yet — say hi!</div>';
-            else msgs.forEach(m => appendMsg(m));
+          let msgs = local.slice();
+          if (data && typeof data === 'object') {
+            const remote = Object.values(data).filter(m => m && m.text);
+            const seen = new Set(local.map(m => m.time + m.text));
+            remote.forEach(m => { if (!seen.has(m.time + m.text)) { msgs.push(m); seen.add(m.time + m.text); } });
           }
+          msgs.sort((a, b) => (a.time || 0) - (b.time || 0));
+          c.innerHTML = '';
+          if (msgs.length === 0) c.innerHTML = '<div class="empty-chat">No messages yet — say hi!</div>';
+          else msgs.forEach(m => appendMsg(m));
           c.scrollTop = c.scrollHeight;
-        }).catch(() => {});
+        }).catch(() => {
+          if (!c || !document.getElementById('screen-chat').classList.contains('active')) return;
+          c.innerHTML = '';
+          if (local.length === 0) c.innerHTML = '<div class="empty-chat">No messages yet — say hi!</div>';
+          else local.sort((a, b) => (a.time || 0) - (b.time || 0)).forEach(m => appendMsg(m));
+          c.scrollTop = c.scrollHeight;
+        });
       }
       loadMessages();
       pollInterval = setInterval(loadMessages, 2000);
@@ -439,28 +463,21 @@
       const key = [me.id, currentPartner].sort().join('_');
       const msg = { from: me.id, text, time: Date.now() };
 
+      saveLocalMessage(key, msg);
       const empty = document.querySelector('.empty-chat');
       if (empty) empty.remove();
-      const msgEl = appendMsg(msg);
+      appendMsg(msg);
       inp.value = '';
       inp.focus();
 
       const urls = [DB_URL, 'https://secret-chat-app-9f5db-default-rtdb.us-central1.firebasedatabase.app'];
       function trySend(i) {
-        if (i >= urls.length) {
-          msgEl.remove();
-          inp.value = text;
-          inp.focus();
-          alert('Connection failed. Create Realtime Database in Firebase Console (Build > Realtime Database), then copy the database URL and paste it in index.html as databaseURL.');
-          return;
-        }
+        if (i >= urls.length) return;
         fetch(urls[i] + '/chats/' + key + '.json', {
           method: 'POST',
           body: JSON.stringify(msg),
           headers: { 'Content-Type': 'application/json' }
-        }).then(r => {
-          if (!r.ok) throw new Error();
-        }).catch(() => trySend(i + 1));
+        }).then(r => { if (!r.ok) throw new Error(); }).catch(() => trySend(i + 1));
       }
       trySend(0);
     }
@@ -472,20 +489,29 @@
     document.addEventListener('visibilitychange', () => {
       if (document.visibilityState === 'visible' && me && currentPartner) {
         const key = [me.id, currentPartner].sort().join('_');
+        const localMsgs = getLocalMessages(key);
         fetch(DB_URL + '/chats/' + key + '.json').then(r => r.json()).then(data => {
           const c = document.getElementById('chat-messages');
           if (!c || !document.getElementById('screen-chat').classList.contains('active')) return;
-          c.innerHTML = '';
-          if (!data || typeof data !== 'object') {
-            c.innerHTML = '<div class="empty-chat">No messages yet — say hi!</div>';
-          } else {
-            const msgs = Object.values(data).filter(m => m && m.text);
-            msgs.sort((a, b) => (a.time || 0) - (b.time || 0));
-            if (msgs.length === 0) c.innerHTML = '<div class="empty-chat">No messages yet — say hi!</div>';
-            else msgs.forEach(m => appendMsg(m));
+          let msgs = localMsgs.slice();
+          if (data && typeof data === 'object') {
+            const remote = Object.values(data).filter(m => m && m.text);
+            const seen = new Set(localMsgs.map(m => m.time + m.text));
+            remote.forEach(m => { if (!seen.has(m.time + m.text)) { msgs.push(m); seen.add(m.time + m.text); } });
           }
+          msgs.sort((a, b) => (a.time || 0) - (b.time || 0));
+          c.innerHTML = '';
+          if (msgs.length === 0) c.innerHTML = '<div class="empty-chat">No messages yet — say hi!</div>';
+          else msgs.forEach(m => appendMsg(m));
           c.scrollTop = c.scrollHeight;
-        }).catch(() => {});
+        }).catch(() => {
+          const c = document.getElementById('chat-messages');
+          if (!c || !document.getElementById('screen-chat').classList.contains('active')) return;
+          c.innerHTML = '';
+          if (localMsgs.length === 0) c.innerHTML = '<div class="empty-chat">No messages yet — say hi!</div>';
+          else localMsgs.sort((a, b) => (a.time || 0) - (b.time || 0)).forEach(m => appendMsg(m));
+          c.scrollTop = c.scrollHeight;
+        });
       }
     });
 
