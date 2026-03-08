@@ -42,7 +42,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/assets', express.static(path.join(__dirname, 'assets')));
 
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  res.sendFile(path.join(__dirname, 'index.html'));
 });
 
 io.on('connection', (socket) => {
@@ -94,7 +94,7 @@ io.on('connection', (socket) => {
     data.chats[key].push(msg);
     save();
 
-    io.to(userId).to(to).emit('new-message', { chatKey: key, message: msg });
+    io.emit('new-message', { chatKey: key, message: msg });
   });
 
   socket.on('update-settings', ({ displayName, newPassword, removePassword }) => {

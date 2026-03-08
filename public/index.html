@@ -130,13 +130,13 @@
       margin: 0;
       appearance: none;
       -webkit-appearance: none;
-      transition: all 0.3s cubic-bezier(0.25,0.46,0.45,0.94);
-      animation: fadeUp 0.5s ease forwards;
+      transition: all 0.15s ease-out;
+      animation: fadeUp 0.12s ease forwards;
       opacity: 0;
     }
-    .card:nth-child(1) { animation-delay: 0.1s; }
-    .card:nth-child(2) { animation-delay: 0.25s; }
-    .card:nth-child(3) { animation-delay: 0.4s; }
+    .card:nth-child(1) { animation-delay: 0.02s; }
+    .card:nth-child(2) { animation-delay: 0.05s; }
+    .card:nth-child(3) { animation-delay: 0.08s; }
     .card:hover { transform: translateY(-8px); box-shadow: 0 20px 60px rgba(0,0,0,0.08); border-color: #d0d0d0; }
     .card:active { transform: translateY(-2px) scale(0.98); }
     .card-avatar {
@@ -488,6 +488,7 @@
           alert('Server not connected. Run "npm start" in the project folder, then open http://localhost:3000');
           return;
         }
+        showCardsWithDefaults();
         socket.emit('get-accounts');
       }
     });
@@ -525,6 +526,7 @@
           alert('Server not connected. Run "npm start" in the project folder, then open http://localhost:3000');
           return;
         }
+        showCardsWithDefaults();
         socket.emit('get-accounts');
       }
     });
@@ -542,9 +544,18 @@
       }
     });
 
-    // ── Receive accounts list → build cards ──
-    socket.on('accounts-list', (list) => {
-      accounts = list;
+    function showCardsWithDefaults() {
+      const defaults = [
+        { id: 'luca', displayName: 'Luca', hasPassword: false },
+        { id: 'matteo', displayName: 'Matteo', hasPassword: false },
+        { id: 'nora', displayName: 'Nora', hasPassword: false }
+      ];
+      accounts = defaults;
+      buildCardsEl(defaults);
+      show('screen-cards');
+    }
+
+    function buildCardsEl(list) {
       const el = document.getElementById('screen-cards');
       const gradients = [
         'linear-gradient(135deg, #667eea, #764ba2)',
@@ -556,7 +567,7 @@
         const card = document.createElement('button');
         card.type = 'button';
         card.className = 'card';
-        card.style.animationDelay = (0.1 + i * 0.15) + 's';
+        card.style.animationDelay = (0.02 + i * 0.03) + 's';
         card.dataset.accountId = a.id;
         card.innerHTML =
           '<div class="card-avatar" style="background:' + gradients[i % 3] + '">' +
@@ -566,7 +577,12 @@
           (a.hasPassword ? '<div class="card-lock">&#128274; password</div>' : '');
         el.appendChild(card);
       });
-      show('screen-cards');
+    }
+
+    socket.on('accounts-list', (list) => {
+      accounts = list;
+      buildCardsEl(list);
+      if (!document.getElementById('screen-cards').classList.contains('active')) show('screen-cards');
     });
 
     document.getElementById('screen-cards').addEventListener('click', (e) => {

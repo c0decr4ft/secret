@@ -200,6 +200,11 @@
     </div>
   </div>
 
+  <script>
+    if (window.location.protocol !== 'file:' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
+      document.write('<script src="/socket.io/socket.io.js"><\/script>');
+    }
+  </script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
   <script>
@@ -224,6 +229,10 @@
     const db = firebase.database();
     const DB_URL = firebaseConfig.databaseURL.replace(/\/$/, '');
     const STORAGE_KEY = 'secret_chat_';
+
+    const socket = (typeof io !== 'undefined') ? io() : null;
+    function useSocket() { return socket && socket.connected; }
+    function chatKey(a, b) { return [a, b].sort().join(':'); }
 
     function getLocalMessages(key) {
       try {
@@ -263,26 +272,30 @@
         }));
         buildCards();
         show('screen-cards');
-        db.ref('accounts').once('value', snap => {
-          if (snap.exists()) {
-            const data = snap.val();
-            accounts = Object.keys(data).map(k => ({
-              id: k,
-              displayName: (data[k] && data[k].displayName) || k,
-              hasPassword: !!(data[k] && data[k].password)
-            }));
-            buildCards();
-          } else {
-            db.ref('accounts').set(DEFAULT_ACCOUNTS).then(() => {
-              accounts = Object.keys(DEFAULT_ACCOUNTS).map(k => ({
+        if (useSocket()) {
+          socket.emit('get-accounts');
+        } else {
+          db.ref('accounts').once('value', snap => {
+            if (snap.exists()) {
+              const data = snap.val();
+              accounts = Object.keys(data).map(k => ({
                 id: k,
-                displayName: DEFAULT_ACCOUNTS[k].displayName,
-                hasPassword: !!(DEFAULT_ACCOUNTS[k].password)
+                displayName: (data[k] && data[k].displayName) || k,
+                hasPassword: !!(data[k] && data[k].password)
               }));
               buildCards();
-            });
-          }
-        });
+            } else {
+              db.ref('accounts').set(DEFAULT_ACCOUNTS).then(() => {
+                accounts = Object.keys(DEFAULT_ACCOUNTS).map(k => ({
+                  id: k,
+                  displayName: DEFAULT_ACCOUNTS[k].displayName,
+                  hasPassword: !!(DEFAULT_ACCOUNTS[k].password)
+                }));
+                buildCards();
+              });
+            }
+          });
+        }
       }
     }
 
@@ -349,6 +362,7 @@
         pendingLoginId = null;
         document.getElementById('password-overlay').classList.remove('active');
         document.getElementById('logged-as').textContent = me.displayName;
+        if (useSocket()) socket.emit('login', { id: myId, password: password || null });
         const others = accounts.filter(a => a.id !== myId);
         currentPartner = others[0]?.id;
         if (!currentPartner) return;
@@ -370,7 +384,7 @@
           const local = accounts.find(a => a.id === myId);
           if (local) proceed({ id: myId, displayName: local.displayName, password: '' });
         }
-      }, 3000);
+      }, 500);
     }
 
     function nameOf(id) {
@@ -395,47 +409,53 @@
     function switchChat(partnerId) {
       if (chatListenerRef) chatListenerRef.off();
       if (pollInterval) clearInterval(pollInterval);
+      pollInterval = null;
       currentPartner = partnerId;
       document.getElementById('chat-partner-name').textContent = nameOf(partnerId);
       renderTabs();
 
       const key = [me.id, partnerId].sort().join('_');
       const c = document.getElementById('chat-messages');
-      const localMsgs = getLocalMessages(key);
-      if (localMsgs.length > 0) {
-        c.innerHTML = '';
-        localMsgs.sort((a, b) => (a.time || 0) - (b.time || 0)).forEach(m => appendMsg(m));
-      } else {
-        c.innerHTML = '<div class="empty-chat">No messages yet — say hi!</div>';
-      }
-      document.getElementById('chat-input').focus();
 
-      function loadMessages() {
-        const local = getLocalMessages(key);
-        fetch(DB_URL + '/chats/' + key + '.json').then(r => r.json()).then(data => {
-          if (!c || !document.getElementById('screen-chat').classList.contains('active')) return;
-          let msgs = local.slice();
-          if (data && typeof data === 'object') {
-            const remote = Object.values(data).filter(m => m && m.text);
-            const seen = new Set(local.map(m => m.time + m.text));
-            remote.forEach(m => { if (!seen.has(m.time + m.text)) { msgs.push(m); seen.add(m.time + m.text); } });
-          }
-          msgs.sort((a, b) => (a.time || 0) - (b.time || 0));
+      if (useSocket()) {
+        c.innerHTML = '<div class="empty-chat">Loading...</div>';
+        socket.emit('load-chat', { with: partnerId });
+      } else {
+        const localMsgs = getLocalMessages(key);
+        if (localMsgs.length > 0) {
           c.innerHTML = '';
-          if (msgs.length === 0) c.innerHTML = '<div class="empty-chat">No messages yet — say hi!</div>';
-          else msgs.forEach(m => appendMsg(m));
-          c.scrollTop = c.scrollHeight;
-        }).catch(() => {
-          if (!c || !document.getElementById('screen-chat').classList.contains('active')) return;
-          c.innerHTML = '';
-          if (local.length === 0) c.innerHTML = '<div class="empty-chat">No messages yet — say hi!</div>';
-          else local.sort((a, b) => (a.time || 0) - (b.time || 0)).forEach(m => appendMsg(m));
-          c.scrollTop = c.scrollHeight;
-        });
+          localMsgs.sort((a, b) => (a.time || 0) - (b.time || 0)).forEach(m => appendMsg(m));
+        } else {
+          c.innerHTML = '<div class="empty-chat">No messages yet — say hi!</div>';
+        }
+        function loadMessages() {
+          const local = getLocalMessages(key);
+          fetch(DB_URL + '/chats/' + key + '.json').then(r => r.json()).then(data => {
+            if (!c || !document.getElementById('screen-chat').classList.contains('active')) return;
+            let msgs = local.slice();
+            if (data && typeof data === 'object') {
+              const remote = Object.values(data).filter(m => m && m.text);
+              const seen = new Set(local.map(m => m.time + m.text));
+              remote.forEach(m => { if (!seen.has(m.time + m.text)) { msgs.push(m); seen.add(m.time + m.text); } });
+            }
+            msgs.sort((a, b) => (a.time || 0) - (b.time || 0));
+            c.innerHTML = '';
+            if (msgs.length === 0) c.innerHTML = '<div class="empty-chat">No messages yet — say hi!</div>';
+            else msgs.forEach(m => appendMsg(m));
+            c.scrollTop = c.scrollHeight;
+          }).catch(() => {
+            if (!c || !document.getElementById('screen-chat').classList.contains('active')) return;
+            c.innerHTML = '';
+            if (local.length === 0) c.innerHTML = '<div class="empty-chat">No messages yet — say hi!</div>';
+            else local.sort((a, b) => (a.time || 0) - (b.time || 0)).forEach(m => appendMsg(m));
+            c.scrollTop = c.scrollHeight;
+          });
+        }
+        loadMessages();
+        pollInterval = setInterval(loadMessages, 2000);
       }
-      loadMessages();
-      pollInterval = setInterval(loadMessages, 2000);
-      chatListenerRef = { off: () => clearInterval(pollInterval) };
+      chatListenerRef = { off: () => { if (pollInterval) clearInterval(pollInterval); pollInterval = null; } };
+      document.getElementById('chat-input').focus();
     }
 
     function esc(t) {
@@ -470,21 +490,54 @@
       inp.value = '';
       inp.focus();
 
-      const urls = [DB_URL, 'https://secret-chat-app-9f5db-default-rtdb.us-central1.firebasedatabase.app'];
-      function trySend(i) {
-        if (i >= urls.length) return;
-        fetch(urls[i] + '/chats/' + key + '.json', {
-          method: 'POST',
-          body: JSON.stringify(msg),
-          headers: { 'Content-Type': 'application/json' }
-        }).then(r => { if (!r.ok) throw new Error(); }).catch(() => trySend(i + 1));
+      if (useSocket()) {
+        socket.emit('send-message', { to: currentPartner, text });
+      } else {
+        const urls = [DB_URL, 'https://secret-chat-app-9f5db-default-rtdb.us-central1.firebasedatabase.app'];
+        function trySend(i) {
+          if (i >= urls.length) return;
+          fetch(urls[i] + '/chats/' + key + '.json', {
+            method: 'POST',
+            body: JSON.stringify(msg),
+            headers: { 'Content-Type': 'application/json' }
+          }).then(r => { if (!r.ok) throw new Error(); }).catch(() => trySend(i + 1));
+        }
+        trySend(0);
       }
-      trySend(0);
     }
 
     document.getElementById('chat-input').addEventListener('keydown', e => {
       if (e.key === 'Enter') { e.preventDefault(); sendMessage(); }
     });
+
+    if (socket) {
+      socket.on('accounts-list', (list) => {
+        accounts = list;
+        buildCards();
+      });
+      socket.on('new-message', ({ chatKey: key, message }) => {
+        if (!me || key !== chatKey(me.id, currentPartner) || message.from === me.id) return;
+        const c = document.getElementById('chat-messages');
+        const empty = c.querySelector('.empty-chat');
+        if (empty) empty.remove();
+        appendMsg(message);
+        c.scrollTop = c.scrollHeight;
+      });
+      socket.on('chat-history', ({ partner, messages }) => {
+        if (partner !== currentPartner) return;
+        const c = document.getElementById('chat-messages');
+        c.innerHTML = '';
+        if (!messages.length) c.innerHTML = '<div class="empty-chat">No messages yet — say hi!</div>';
+        else messages.forEach(m => appendMsg(m));
+        c.scrollTop = c.scrollHeight;
+      });
+      socket.on('connect', () => {
+        if (me) {
+          socket.emit('login', { id: me.id, password: null });
+          if (currentPartner) socket.emit('load-chat', { with: currentPartner });
+        }
+      });
+    }
 
     document.addEventListener('visibilitychange', () => {
       if (document.visibilityState === 'visible' && me && currentPartner) {
