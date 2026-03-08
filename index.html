@@ -381,8 +381,10 @@
       });
     }
 
+    let pollInterval = null;
     function switchChat(partnerId) {
       if (chatListenerRef) chatListenerRef.off();
+      if (pollInterval) clearInterval(pollInterval);
       currentPartner = partnerId;
       document.getElementById('chat-partner-name').textContent = nameOf(partnerId);
       renderTabs();
@@ -392,17 +394,24 @@
       c.innerHTML = '<div class="empty-chat">No messages yet — say hi!</div>';
       document.getElementById('chat-input').focus();
 
-      chatListenerRef = db.ref('chats/' + key);
-      chatListenerRef.on('value', snap => {
-        c.innerHTML = '';
-        const data = snap.val();
-        if (!data) {
-          c.innerHTML = '<div class="empty-chat">No messages yet — say hi!</div>';
-        } else {
-          Object.values(data).sort((a, b) => (a.time || 0) - (b.time || 0)).forEach(m => appendMsg(m));
-        }
-        c.scrollTop = c.scrollHeight;
-      });
+      function loadMessages() {
+        fetch(DB_URL + '/chats/' + key + '.json').then(r => r.json()).then(data => {
+          if (!c || !document.getElementById('screen-chat').classList.contains('active')) return;
+          c.innerHTML = '';
+          if (!data || typeof data !== 'object') {
+            c.innerHTML = '<div class="empty-chat">No messages yet — say hi!</div>';
+          } else {
+            const msgs = Object.values(data).filter(m => m && m.text);
+            msgs.sort((a, b) => (a.time || 0) - (b.time || 0));
+            if (msgs.length === 0) c.innerHTML = '<div class="empty-chat">No messages yet — say hi!</div>';
+            else msgs.forEach(m => appendMsg(m));
+          }
+          c.scrollTop = c.scrollHeight;
+        }).catch(() => {});
+      }
+      loadMessages();
+      pollInterval = setInterval(loadMessages, 2000);
+      chatListenerRef = { off: () => clearInterval(pollInterval) };
     }
 
     function esc(t) {
@@ -422,15 +431,6 @@
       return div;
     }
 
-    function sendViaRest(key, msg, url) {
-      const base = url || DB_URL;
-      return fetch(base + '/chats/' + key + '.json', {
-        method: 'POST',
-        body: JSON.stringify(msg),
-        headers: { 'Content-Type': 'application/json' }
-      }).then(r => { if (!r.ok) throw new Error('REST failed'); });
-    }
-
     function sendMessage() {
       const inp = document.getElementById('chat-input');
       const text = inp.value.trim();
@@ -445,24 +445,22 @@
       inp.value = '';
       inp.focus();
 
-      function trySend(attempt) {
-        const urls = [DB_URL, 'https://secret-chat-app-9f5db-default-rtdb.us-central1.firebasedatabase.app'];
-        const tryRest = (i) => {
-          if (i >= urls.length) {
-            msgEl.remove();
-            inp.value = text;
-            inp.focus();
-            alert('Connection failed. In Firebase Console: 1) Create Realtime Database (Build > Realtime Database). 2) Copy your database URL from the console. 3) In index.html, update databaseURL in firebaseConfig.');
-            return;
-          }
-          sendViaRest(key, msg, urls[i]).then(() => {}).catch(() => tryRest(i + 1));
-        };
-        db.ref('chats/' + key).push(msg)
-          .then(() => {})
-          .catch(() => {
-            if (attempt < 1) setTimeout(() => trySend(1), 500);
-            else tryRest(0);
-          });
+      const urls = [DB_URL, 'https://secret-chat-app-9f5db-default-rtdb.us-central1.firebasedatabase.app'];
+      function trySend(i) {
+        if (i >= urls.length) {
+          msgEl.remove();
+          inp.value = text;
+          inp.focus();
+          alert('Connection failed. Create Realtime Database in Firebase Console (Build > Realtime Database), then copy the database URL and paste it in index.html as databaseURL.');
+          return;
+        }
+        fetch(urls[i] + '/chats/' + key + '.json', {
+          method: 'POST',
+          body: JSON.stringify(msg),
+          headers: { 'Content-Type': 'application/json' }
+        }).then(r => {
+          if (!r.ok) throw new Error();
+        }).catch(() => trySend(i + 1));
       }
       trySend(0);
     }
@@ -471,22 +469,23 @@
       if (e.key === 'Enter') { e.preventDefault(); sendMessage(); }
     });
 
-    // Refresh chat when returning to tab (messages are stored in Firebase and persist across reloads/devices)
     document.addEventListener('visibilitychange', () => {
       if (document.visibilityState === 'visible' && me && currentPartner) {
         const key = [me.id, currentPartner].sort().join('_');
-        db.ref('chats/' + key).once('value', snap => {
+        fetch(DB_URL + '/chats/' + key + '.json').then(r => r.json()).then(data => {
           const c = document.getElementById('chat-messages');
           if (!c || !document.getElementById('screen-chat').classList.contains('active')) return;
-          const data = snap.val();
           c.innerHTML = '';
-          if (!data) {
+          if (!data || typeof data !== 'object') {
             c.innerHTML = '<div class="empty-chat">No messages yet — say hi!</div>';
           } else {
-            Object.values(data).sort((a, b) => (a.time || 0) - (b.time || 0)).forEach(m => appendMsg(m));
+            const msgs = Object.values(data).filter(m => m && m.text);
+            msgs.sort((a, b) => (a.time || 0) - (b.time || 0));
+            if (msgs.length === 0) c.innerHTML = '<div class="empty-chat">No messages yet — say hi!</div>';
+            else msgs.forEach(m => appendMsg(m));
           }
           c.scrollTop = c.scrollHeight;
-        });
+        }).catch(() => {});
       }
     });
 

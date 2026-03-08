@@ -112,7 +112,7 @@
     #screen-cards {
       align-items: center;
       justify-content: center;
-      background: #fff;
+      background: #fff url('/assets/background.png') center/cover no-repeat;
       gap: 2rem;
       flex-wrap: wrap;
       padding: 2rem;
@@ -204,7 +204,8 @@
     .chat-with-name { font-weight: 600; font-size: 1.05rem; flex: 1; }
     .logged-as { font-size: 0.7rem; color: #bbb; }
 
-    .chat-tabs { display: flex; border-bottom: 1px solid #f0f0f0; flex-shrink: 0; }
+    .chat-tabs-label { font-size: 0.7rem; color: #999; padding: 0.4rem 1.2rem 0; }
+    .chat-tabs { display: flex; border-bottom: 1px solid #f0f0f0; flex-shrink: 0; background: #fafafa; }
     .chat-tab {
       flex: 1; padding: 0.75rem; text-align: center;
       font-size: 0.85rem; font-weight: 500;
@@ -362,6 +363,7 @@
       <span class="logged-as" id="logged-as"></span>
       <button class="header-btn" onclick="openSettings()" title="Settings">&#9881;</button>
     </div>
+    <div class="chat-tabs-label">Chat with:</div>
     <div class="chat-tabs" id="chat-tabs"></div>
     <div class="chat-messages" id="chat-messages"></div>
     <div class="chat-input-bar">
@@ -494,14 +496,12 @@
     fake404Tap.addEventListener('click', (e) => {
       e.preventDefault();
       e.stopPropagation();
-      if (!document.getElementById('screen-secret').classList.contains('active')) return;
-      socket.emit('get-accounts');
+      secretInput.focus();
     });
     fake404Tap.addEventListener('touchend', (e) => {
       e.preventDefault();
       e.stopPropagation();
-      if (!document.getElementById('screen-secret').classList.contains('active')) return;
-      socket.emit('get-accounts');
+      secretInput.focus();
     }, { passive: false });
 
     secretInput.addEventListener('input', () => {
